@@ -9,6 +9,10 @@ from environment import env
 import uuid
 import shutil
 
+
+
+
+
 class Model:
 
     def __init__(self, name, scaling=5, channels=1, conv_size=9):
@@ -16,7 +20,21 @@ class Model:
         self.scaling = scaling
         self.channels = channels
         self.conv_size = conv_size
-        self.padding = int((self.conv_size - self.scaling)/2)
+
+        # scaling x the pixels, (conv_size - scaling)/2 extra pixels get added on each side as padding from conv2dtranspose
+        # we dont care about these pixels for comparing against target
+        # we also dont care about the pixels influenced by these extra pixels
+        # get rid of depad filter of size 
+        # (conv_size - scaling + 1) - gets rid of pad pixels
+        # (conv_size+1) - gets rid of pixels influenced by padded pixels
+        # so get rid of 2*conv_size - scaling pixels total
+
+        # ex, 5x, conv 9
+        # 0 0 x x X x+y x+y Y y+w y+w W
+        # 18 - 5 = 13 = gets rid of 6 pixels each side
+        # im probably fucking this up since further conv layers increase the impact of pixels
+        # oh well
+
 
 
         self.set_optimizer()
@@ -35,22 +53,17 @@ class Model:
             conv_3 = keras.layers.Conv2D(self.channels, (5,5), strides=(1,1), padding='same')(conv_2)
             
             add_layer = keras.layers.add([conv_3, upscaler])
-            predictions = keras.layers.Conv2D(self.channels, (self.padding*2+1 + (self.conv_size-1), self.padding*2+1 + (self.conv_size-1)), strides=(1,1),
-                                            kernel_initializer='zeros',bias_initializer='zeros')(add_layer)
+
+            depad_filter_size = 2*self.conv_size - self.scaling
+            depad_kernel = np.zeros([depad_filter_size, depad_filter_size,1,1])
+            center = int(depad_kernel.shape[0]/2)
+            depad_kernel[center, center,0,0] = 1
+            depad_bias = np.zeros([1])
+
+            predictions = keras.layers.Conv2D(self.channels, (depad_filter_size, depad_filter_size), strides=(1,1),
+                                            weights=[depad_kernel, depad_bias], trainable=False)(add_layer)
 
             model = keras.Model(inputs=inputs, outputs=predictions)
-
-            # model = keras.Sequential()
-
-            # model.add(keras.layers.Conv2DTranspose(6, (self.conv_size, self.conv_size), strides=(self.scaling,self.scaling), input_shape=(None, None, self.channels)))
-            # # model.add(keras.layers.UpSampling2D(size=(self.scaling,self.scaling), interpolation='bilinear', input_shape=(None, None, self.channels)))
-
-            # model.add(keras.layers.Conv2D(32, (9,9), strides=(1,1), padding='same', activation='relu'))
-            # model.add(keras.layers.Conv2D(16, (1,1), strides=(1,1), padding='same', activation='relu'))
-            # model.add(keras.layers.Conv2D(self.channels, (5,5), strides=(1,1), padding='same'))
-            # model.add(keras.layers.Conv2D(self.channels, (self.padding*2+1 + (self.conv_size-1), self.padding*2+1 + (self.conv_size-1)), strides=(1,1),
-            #                                 kernel_initializer='zeros',bias_initializer='zeros'))
-
 
             model.compile(self.optimizer, self.loss)
 

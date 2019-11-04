@@ -46,7 +46,7 @@ image_names = [x.name for x in images]
 preds = mt.model.model.predict(x)
 
 
-mt.train(images, 500, 10)
+mt.train(images, 500, 500)
 
 
 # import matplotlib.pyplot as plt
