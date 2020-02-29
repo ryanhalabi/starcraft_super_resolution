@@ -4,12 +4,7 @@ import cv2
 
 video_folder = "/Users/ryan/starcraft_upres/videos/"
 yt = YouTube("https://www.youtube.com/watch?v=lTyco9kbFdo")
-stream = (
-    yt.streams.filter(progressive=True, file_extension="mp4")
-    .order_by("resolution")
-    .desc()
-    .first()
-)
+stream = yt.streams.filter(progressive=True, file_extension="mp4").order_by("resolution").desc().first()
 
 stream.download(video_folder)
 

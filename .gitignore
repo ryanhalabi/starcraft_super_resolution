@@ -1,3 +1,4 @@
-upres/data/input_data/*
+upres/data/input/*
+upres/data/output/*
 /_pycache_/*
 upres/upres.egg-info

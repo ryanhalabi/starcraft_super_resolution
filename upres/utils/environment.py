@@ -1,14 +1,18 @@
 from pathlib import Path
 import os
 
+from upres import data
 
 class Environment(object):
     def __init__(self):
-        pwd = Path(os.getcwd())
 
-        self.frames = pwd / "data" / "input_data" / "frames"
-        self.units = pwd / "data" / "input_data" / "units"
-        self.output_data = pwd / "data" / "output_data"
+        pwd = data.__file__
+        pwd = Path(pwd.split('/__init__.py')[0])
+
+        self.frames = pwd / "input" / "frames"
+        self.units = pwd / "input" / "units"
+
+        self.output = pwd / "output"
 
 
 env = Environment()

@@ -19,10 +19,12 @@ class Image:
 
     def get_array(self, scale=1):
         array = cv2.imread(str(self.path), self.read_type)
-        if scale != 1:
-            array = cv2.resize(
-                array, (int(array.shape[0] * scale), int(array.shape[1] * scale))
-            )
+        array = cv2.resize(array, (int(array.shape[1] * scale), int(array.shape[0] * scale)))
+
+        # cv2.imshow('image',array)
+        # cv2.waitKey(0)
+        # cv2.destroyAllWindows()
+        
         if self.greyscale:
             array = np.expand_dims(array, 2)
         return array

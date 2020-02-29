@@ -5,19 +5,18 @@ from upres.utils.environment import env
 import os
 import numpy as np
 
+greyscale = False
+channels = 1 if greyscale else 3
+scaling = 2
 
+images = [Image( env.frames / x, greyscale=greyscale) for x in os.listdir(env.frames)][0:1]
+image_shape = tuple(images[0].get_array(1 / scaling).shape)
+assert [x/scaling == int(x/scaling) for x in image_shape]
 
-images = [Image( env.frames / x, greyscale=False) for x in os.listdir(env.frames)]
-scale_factor = 3
+sr_model = SRModel('color', image_shape, channels=channels, scaling=scaling, conv_size=5, overwrite=False)
 
-
-
-
-model = SRModel('test_color',channels=3, scaling=scale_factor)
-mt = ModelTrainer(model, False)
-
-# mt.train(images, epochs=500, save=50)
-
+mt = ModelTrainer(sr_model)
+mt.train(images, epochs=10, batches=5)
 
 
 # x = np.array([x.get_array(scale_factor) for x in images])
