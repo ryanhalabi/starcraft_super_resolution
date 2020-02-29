@@ -33,10 +33,10 @@ class SRModel:
 
     def load_model(self, model_files):
         
-        iteration = max([ re.findall(r"_(\d+).hdf5", x)[0] for x in model_files])
+        iteration = max([ int(re.findall(r"_(\d+).hdf5", x)[0]) for x in model_files])
         model_file_path = self.model_path / "models" / f"{self.name}_{iteration}.hdf5"
 
-        self.iteration = int(iteration)
+        self.iteration = iteration
         self.model = keras.models.load_model(str(model_file_path))
 
 

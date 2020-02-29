@@ -34,8 +34,6 @@ class ModelTrainer:
         self.Y = y [:,padding:-padding, padding:-padding,:]
 
         if self.sr_model.iteration == 0:
-            import pdb
-            pdb.set_trace()
             self.log_images(self.Y, override_step=-1)
 
 
@@ -52,7 +50,7 @@ class ModelTrainer:
             )
 
             self.predict(images, self.sr_model.iteration)
-            print(f"Epoch {i} Loss: {self.sr_model.model.history.history['loss'][-1]}")
+            print(f"Epoch {self.sr_model.iteration} Loss: {self.sr_model.model.history.history['loss'][-1]}")
 
             self.sr_model.iteration += 1
             self.sr_model.save_model()

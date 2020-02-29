@@ -13,10 +13,10 @@ images = [Image( env.frames / x, greyscale=greyscale) for x in os.listdir(env.fr
 image_shape = tuple(images[0].get_array(1 / scaling).shape)
 assert [x/scaling == int(x/scaling) for x in image_shape]
 
-sr_model = SRModel('color', image_shape, channels=channels, scaling=scaling, conv_size=5, overwrite=False)
+sr_model = SRModel('color', image_shape, channels=channels, scaling=scaling, conv_size=5, overwrite=True)
 
 mt = ModelTrainer(sr_model)
-mt.train(images, epochs=10, batches=5)
+mt.train(images, epochs=10, batches=30)
 
 
 # x = np.array([x.get_array(scale_factor) for x in images])
