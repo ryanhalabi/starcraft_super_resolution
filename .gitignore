@@ -1,5 +1,3 @@
-/input_data/*
+upres/data/input_data/*
 /_pycache_/*
-/client_secrets.json
-/frames/*
-/videos/*
+upres/upres.egg-info
