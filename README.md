@@ -1,11 +1,14 @@
 # starcraft_super_resolution
 Project to upscale Starcraft images using Super Resolution techniques.
 
-Load Data
+Load Data 
+
 Run the `download_unit_images` function in `upres/utils/image.py`
 
-Execute
+Execute 
+
 `python3 run.py`
 
-Display Results
+Display Results 
+
 `tensorboard --logdir starcraft_upres/upres/data/output`
