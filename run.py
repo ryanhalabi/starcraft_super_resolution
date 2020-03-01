@@ -5,18 +5,36 @@ from upres.utils.environment import env
 import os
 import numpy as np
 
+#COLOR
 greyscale = False
 channels = 1 if greyscale else 3
 scaling = 2
 
-images = [Image( env.frames / x, greyscale=greyscale) for x in os.listdir(env.frames)][0:1]
+images = [Image( env.frames / x, greyscale=greyscale) for x in os.listdir(env.frames)][0:4]
 image_shape = tuple(images[0].get_array(1 / scaling).shape)
 assert [x/scaling == int(x/scaling) for x in image_shape]
 
-sr_model = SRModel('color', image_shape, channels=channels, scaling=scaling, conv_size=5, overwrite=True)
+sr_model = SRModel('color', image_shape, channels=channels, scaling=scaling, conv_size=5, overwrite=False)
 
 mt = ModelTrainer(sr_model)
-mt.train(images, epochs=10, batches=30)
+# mt.train(images, epochs=0, batches=0, log=False)
+mt.train(images, epochs=1, batches=200)
+
+
+
+# #GREYSCALE
+# greyscale = True
+# channels = 1 if greyscale else 3
+# scaling = 2
+
+# images = [Image( env.frames / x, greyscale=greyscale) for x in os.listdir(env.frames)][0:1]
+# image_shape = tuple(images[0].get_array(1 / scaling).shape)
+# assert [x/scaling == int(x/scaling) for x in image_shape]
+
+# sr_model = SRModel('grey', image_shape, channels=channels, scaling=scaling, conv_size=5, overwrite=True)
+
+# mt = ModelTrainer(sr_model)
+# mt.train(images, epochs=10, batches=30)
 
 
 # x = np.array([x.get_array(scale_factor) for x in images])

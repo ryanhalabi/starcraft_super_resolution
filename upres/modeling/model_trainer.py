@@ -24,7 +24,7 @@ class ModelTrainer:
         self.sr_model = sr_model
         self.set_up_res_model()
 
-    def train(self, images, epochs, batches):
+    def train(self, images, epochs, batches, log=True):
         train_images = images
 
         self.X = np.array([x.get_array(1 / self.sr_model.scaling) for x in train_images])
@@ -44,13 +44,15 @@ class ModelTrainer:
             os.mkdir(iteration_path)
 
             tensorboard_callback = TensorBoard(log_dir=str(iteration_path), histogram_freq=1)
+            callbacks = [tensorboard_callback] if log else []
 
             self.sr_model.model.fit(
-                self.X, self.Y, epochs=epochs, verbose=1, callbacks=[tensorboard_callback],
+                self.X, self.Y, epochs=epochs, verbose=1, callbacks=callbacks,
             )
 
-            self.predict(images, self.sr_model.iteration)
-            print(f"Epoch {self.sr_model.iteration} Loss: {self.sr_model.model.history.history['loss'][-1]}")
+            if log:
+                self.predict(images, self.sr_model.iteration)
+            print(f"Model iteration {self.sr_model.iteration} Loss: {self.sr_model.model.history.history['loss'][-1]}")
 
             self.sr_model.iteration += 1
             self.sr_model.save_model()
