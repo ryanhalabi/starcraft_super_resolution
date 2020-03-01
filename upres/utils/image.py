@@ -34,7 +34,7 @@ def download_images(urls):
 
     for url in urls:
         unit = re.search(r"[/\d]([\w]*).png", url).group(1)
-        file_name = str(env.frames / f"{unit}.png")
+        file_name = str(env.units / f"{unit}.png")
         with open(file_name, "wb+") as f:
             f.write(requests.get(url).content)
 
