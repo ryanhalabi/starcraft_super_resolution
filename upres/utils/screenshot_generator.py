@@ -25,7 +25,7 @@ def download_video_frames():
             success, image = vidcap.read()
             frame += 1
 
-            if (frame % (fps * 5) == 0) and (frame > 65) and (frame <= 2100):
+            if (frame % (fps * 5) == 0) and (frame/fps > 65) and (frame/fps <= 2100):
                 print("Time:", frame / fps)
                 file_name = str(env.frames / f"{int(frame/fps)}.png")
                 cv2.imwrite(file_name, image[:-250, 0:960])
