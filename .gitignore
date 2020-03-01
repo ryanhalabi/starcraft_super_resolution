@@ -7,3 +7,4 @@
 /upres/data/__pycache__/*
 /upres/utils/__pycache__/*
 /upres/modeling/__pycache__/*
+launch.py

@@ -1,5 +1,5 @@
 from upres.utils.image import Image, download_unit_images
-from upres.modeling.model_trainer import ModelTrainer 
+from upres.modeling.model_trainer import ModelTrainer
 from upres.modeling.sr_model import SRModel
 from upres.utils.environment import env
 from upres.utils.image import download_unit_images
@@ -8,30 +8,36 @@ import os
 import numpy as np
 
 
-#download unit images if empty
+# download unit images if empty
 if len(os.listdir(env.units)) == 1:
     download_unit_images()
 
-#download frame images if empty
+# download frame images if empty
 if len(os.listdir(env.frames)) == 1:
     download_video_frames()
 
-#COLOR
+# COLOR
 greyscale = False
 channels = 1 if greyscale else 3
 scaling = 2
 
-images_files = [x for x in os.listdir(env.units) if x != '.gitignore']
-images = [Image( env.units / x, greyscale=greyscale) for x in images_files]
+images_files = [x for x in os.listdir(env.units) if x != ".gitignore"]
+images = [Image(env.units / x, greyscale=greyscale) for x in images_files]
 image_shape = tuple(images[0].get_array(1 / scaling).shape)
-assert [x/scaling == int(x/scaling) for x in image_shape]
+assert [x / scaling == int(x / scaling) for x in image_shape]
 
-sr_model = SRModel('color', image_shape, channels=channels, scaling=scaling, conv_size=5, overwrite=False)
+sr_model = SRModel(
+    "color",
+    image_shape,
+    channels=channels,
+    scaling=scaling,
+    conv_size=5,
+    overwrite=False,
+)
 
 mt = ModelTrainer(sr_model)
 # mt.train(images, epochs=0, batches=0, log=False)
 mt.train(images, epochs=1, batches=200)
-
 
 
 # #GREYSCALE
@@ -53,12 +59,6 @@ mt.train(images, epochs=1, batches=200)
 # image_names = [x.name for x in images]
 
 
-
-
-
-
-
-
 # import matplotlib.pyplot as plt
 # plt.matshow(mt.model.model.layers[0].get_weights()[0][:,:,0,0])
 # plt.show()
@@ -68,10 +68,6 @@ mt.train(images, epochs=1, batches=200)
 # x = images[0].get_array(4)
 # y = mt.model.predict( np.array([x]))
 # # cv2.imwrite( str(env.path / 'images' / f"Atest.png"), x)
-
-
-
-
 
 
 # import matplotlib.pyplot as plt
@@ -120,4 +116,3 @@ mt.train(images, epochs=1, batches=200)
 
 # print(x[0,:,:,1])
 # print(y[0,:,:,1])
-

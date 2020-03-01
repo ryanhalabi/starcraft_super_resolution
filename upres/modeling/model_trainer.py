@@ -14,6 +14,7 @@ import shutil
 import tensorflow as tf
 from keras.callbacks import TensorBoard
 
+
 class ModelTrainer:
     """
     Handles training models and storing results.
@@ -26,15 +27,16 @@ class ModelTrainer:
     def train(self, images, epochs, batches, log=True):
         train_images = images
 
-        self.X = np.array([x.get_array(1 / self.sr_model.scaling) for x in train_images])
+        self.X = np.array(
+            [x.get_array(1 / self.sr_model.scaling) for x in train_images]
+        )
 
         y = np.array([x.get_array() for x in train_images])
         padding = int((self.sr_model.conv_size - 1) / 2)
-        self.Y = y [:,padding:-padding, padding:-padding,:]
+        self.Y = y[:, padding:-padding, padding:-padding, :]
 
         if self.sr_model.iteration == 0:
             self.log_images(self.Y, override_step=-1)
-
 
         for i in range(batches):
             iteration_path = self.sr_model.log_path / str(self.sr_model.iteration)
@@ -42,7 +44,9 @@ class ModelTrainer:
                 shutil.rmtree(iteration_path)
             os.mkdir(iteration_path)
 
-            tensorboard_callback = TensorBoard(log_dir=str(iteration_path), histogram_freq=1)
+            tensorboard_callback = TensorBoard(
+                log_dir=str(iteration_path), histogram_freq=1
+            )
             callbacks = [tensorboard_callback] if log else []
 
             self.sr_model.model.fit(
@@ -51,7 +55,9 @@ class ModelTrainer:
 
             if log:
                 self.predict(images, self.sr_model.iteration)
-            print(f"Model iteration {self.sr_model.iteration} Loss: {self.sr_model.model.history.history['loss'][-1]}")
+            print(
+                f"Model iteration {self.sr_model.iteration} Loss: {self.sr_model.model.history.history['loss'][-1]}"
+            )
 
             self.sr_model.iteration += 1
             self.sr_model.save_model()
@@ -70,11 +76,13 @@ class ModelTrainer:
 
         # for some reason tensorboard is BGR not RGB?
         x = np.copy(images)
-        images[:,:,:,0] = x[:,:,:,2]
-        images[:,:,:,2] = x[:,:,:,0]
+        images[:, :, :, 0] = x[:, :, :, 2]
+        images[:, :, :, 2] = x[:, :, :, 0]
 
         with file_writer.as_default():
-            tf.summary.image(self.sr_model.name, images/255, max_outputs=25, step=step)
+            tf.summary.image(
+                self.sr_model.name, images / 255, max_outputs=25, step=step
+            )
 
     def set_up_res_model(self):
         """

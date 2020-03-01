@@ -3,11 +3,12 @@ import os
 
 from upres import data
 
+
 class Environment(object):
     def __init__(self):
 
         pwd = data.__file__
-        pwd = Path(pwd.split('/__init__.py')[0])
+        pwd = Path(pwd.split("/__init__.py")[0])
 
         self.frames = pwd / "input" / "frames"
         self.units = pwd / "input" / "units"
