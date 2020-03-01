@@ -16,7 +16,7 @@ greyscale = False
 channels = 1 if greyscale else 3
 scaling = 2
 
-images = [Image( env.frames / x, greyscale=greyscale) for x in os.listdir(env.frames)][0:4]
+images = [Image( env.frames / x, greyscale=greyscale) for x in os.listdir(env.units)]
 image_shape = tuple(images[0].get_array(1 / scaling).shape)
 assert [x/scaling == int(x/scaling) for x in image_shape]
 
