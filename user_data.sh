@@ -4,9 +4,9 @@ yum -y install python36
 
 git clone https://github.com/ryanhalabi/starcraft_super_resolution
 
-python3 -m pip install --upgrade pip
-python3 -m pip install -r starcraft_super_resolution/requirements.txt
-python3 -m pip install -e  starcraft_super_resolution/
+pip3 install --upgrade pip
+pip3 install -r starcraft_super_resolution/requirements.txt
+pip3 install -e  starcraft_super_resolution/
 
 
 export PATH=$PATH:/usr/local/bin/
