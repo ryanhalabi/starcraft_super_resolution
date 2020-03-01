@@ -1,3 +1,5 @@
 /_pycache_/*
-upres/upres.egg-info
 /.vscode/*
+/upres.egg-info/*
+/upres/build/*
+/upres/dist/*
