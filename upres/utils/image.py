@@ -32,12 +32,11 @@ class Image:
 
 def download_images(urls):
 
-    if not os.listdir(env.frames):
-        for url in urls:
-            unit = re.search(r"[/\d]([\w]*).png", url).group(1)
-            file_name = str(env.frames / f"{unit}.png")
-            with open(file_name, "wb+") as f:
-                f.write(requests.get(url).content)
+    for url in urls:
+        unit = re.search(r"[/\d]([\w]*).png", url).group(1)
+        file_name = str(env.frames / f"{unit}.png")
+        with open(file_name, "wb+") as f:
+            f.write(requests.get(url).content)
 
 
 def download_unit_images():

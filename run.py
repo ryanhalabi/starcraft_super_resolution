@@ -8,7 +8,7 @@ import numpy as np
 
 
 #download images if empty
-if not os.listdir(env.units):
+if len(os.listdir(env.units)) == 1:
     download_unit_images()
 
 #COLOR
