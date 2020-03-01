@@ -2,8 +2,14 @@ from upres.utils.image import Image, download_unit_images
 from upres.modeling.model_trainer import ModelTrainer 
 from upres.modeling.sr_model import SRModel
 from upres.utils.environment import env
+from upres.utils.image import download_unit_images
 import os
 import numpy as np
+
+
+#download images if empty
+if not os.listdir(env.units):
+    download_unit_images()
 
 #COLOR
 greyscale = False
