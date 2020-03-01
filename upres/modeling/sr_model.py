@@ -42,7 +42,7 @@ class SRModel:
 
     def create_or_load_model(self):
 
-        model_files = os.listdir(self.model_path / "models") if os.path.isdir(self.model_path) else None
+        model_files = os.listdir(self.model_path / "models") if os.path.isdir(self.model_path / "models") else None
         if model_files:
             self.load_model(model_files)
         else:
