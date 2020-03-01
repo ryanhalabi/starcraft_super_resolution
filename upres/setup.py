@@ -4,7 +4,7 @@ setuptools.setup(
     name="upres",  # Replace with your own username
     version="0.0.1",
     author="Ryan Halabi",
-    author_email="ryanhalai@gmai.com",
+    author_email="ryanhalai@gmail.com",
     description="A package to upres starcraft images",
     url="https://github.com/ryanhalabi/starcraft_super_resolution",
     packages=setuptools.find_packages(),
