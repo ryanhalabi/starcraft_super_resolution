@@ -1,22 +1,28 @@
 from pytube import YouTube
 import os
 import cv2
+from upres.utils.environment import env
 
-video_folder = "/Users/ryan/starcraft_upres/videos/"
-yt = YouTube("https://www.youtube.com/watch?v=lTyco9kbFdo")
-stream = yt.streams.filter(progressive=True, file_extension="mp4").order_by("resolution").desc().first()
 
-stream.download(video_folder)
+def download_video_frames():
+    yt = YouTube("https://www.youtube.com/watch?v=43u3mcs9k0Q")
+    stream = yt.streams.filter(progressive=True, file_extension="mp4").order_by("resolution").desc().first()
 
-for file in os.listdir(video_folder):
-    vidcap = cv2.VideoCapture(video_folder + file)
-    fps = vidcap.get(cv2.CAP_PROP_FPS)
-    success, image = vidcap.read()
-    frame = 0
-    while success:
+    stream.download(str(env.videos))
+
+    video_files = [x for x in os.listdir(env.videos) if x != '.gitignore']
+    for video_file in video_files:
+        vidcap = cv2.VideoCapture( str(env.videos / video_file ))
+        fps = vidcap.get(cv2.CAP_PROP_FPS)
         success, image = vidcap.read()
-        frame += 1
+        frame = 0
+        while success:
+            success, image = vidcap.read()
+            frame += 1
 
-        if frame % (fps * 5) == 0:
-            print("Time:", frame / fps)
-            cv2.imwrite(f"frames/{int(frame/fps)}.png", image[:-250, 0:960])
+            if (frame % (fps * 5) == 0) and (frame > 65) and (frame <= 2100):
+                print("Time:", frame / fps)
+                file_name = str(env.frames / f"{int(frame/fps)}.png")
+                cv2.imwrite(file_name, image[:-250, 0:960])
+
+

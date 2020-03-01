@@ -3,13 +3,18 @@ from upres.modeling.model_trainer import ModelTrainer
 from upres.modeling.sr_model import SRModel
 from upres.utils.environment import env
 from upres.utils.image import download_unit_images
+from upres.utils.screenshot_generator import download_video_frames
 import os
 import numpy as np
 
 
-#download images if empty
+#download unit images if empty
 if len(os.listdir(env.units)) == 1:
     download_unit_images()
+
+#download frame images if empty
+if len(os.listdir(env.frames)) == 1:
+    download_video_frames()
 
 #COLOR
 greyscale = False

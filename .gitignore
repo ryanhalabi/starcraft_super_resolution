@@ -3,3 +3,7 @@
 /upres.egg-info/*
 /upres/build/*
 /upres/dist/*
+/upres/__pycache__/*
+/upres/data/__pycache__/*
+/upres/utils/__pycache__/*
+/upres/modeling/__pycache__/*

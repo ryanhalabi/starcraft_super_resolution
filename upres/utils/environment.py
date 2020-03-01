@@ -11,6 +11,7 @@ class Environment(object):
 
         self.frames = pwd / "input" / "frames"
         self.units = pwd / "input" / "units"
+        self.videos = pwd / "input" / "videos"
 
         self.output = pwd / "output"
 
