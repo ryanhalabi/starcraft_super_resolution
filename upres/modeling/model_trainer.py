@@ -76,8 +76,6 @@ class ModelTrainer:
         low_res = self.up_model.predict(self.X)
         low_res = low_res[:,padding:-padding, padding:-padding, :]
         # low_res = np.array([ cv2.resize(self.X[i,:,:,:], (self.Y.shape[2], self.Y.shape[1])) for i in range(self.X.shape[0])])
-        import pdb
-        pdb.set_trace()
         self.log_images(low_res, override_step=-2)
         self.log_images(self.Y, override_step=-1)
 
