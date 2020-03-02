@@ -37,7 +37,7 @@ sr_model = SRModel(
 
 mt = ModelTrainer(sr_model)
 # mt.train(images, epochs=0, batches=0, log=False)
-mt.train(images, epochs=200, batches=10000)
+mt.train(images, epochs=50, batches=10000)
 
 
 # #GREYSCALE

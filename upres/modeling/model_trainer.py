@@ -12,6 +12,7 @@ from upres.utils.environment import env
 import uuid
 import shutil
 import tensorflow as tf
+import cv2
 from keras.callbacks import TensorBoard
 
 
@@ -36,8 +37,7 @@ class ModelTrainer:
         self.Y = y[:, padding:-padding, padding:-padding, :]
 
         if self.sr_model.iteration == 0:
-            self.log_images(self.Y, override_step=-1)
-            self.log_images(self.X, override_step=-2)
+            self.log_initial_images()
 
         for i in range(batches):
             iteration_path = self.sr_model.log_path / str(self.sr_model.iteration)
@@ -71,6 +71,18 @@ class ModelTrainer:
 
         return preds
 
+    def log_initial_images(self):
+        padding = int((self.sr_model.conv_size - 1) / 2)
+        low_res = self.up_model.predict(self.X)
+        low_res = low_res[:,padding:-padding, padding:-padding, :]
+        # low_res = np.array([ cv2.resize(self.X[i,:,:,:], (self.Y.shape[2], self.Y.shape[1])) for i in range(self.X.shape[0])])
+        import pdb
+        pdb.set_trace()
+        self.log_images(low_res, override_step=-2)
+        self.log_images(self.Y, override_step=-1)
+
+
+
     def log_images(self, images, override_step=None):
         step = override_step if override_step else self.sr_model.iteration
         file_writer = tf.summary.create_file_writer(str(self.sr_model.images_path))
@@ -97,6 +109,7 @@ class ModelTrainer:
                 input_shape=(None, None, self.sr_model.channels),
             )
         )
+
         self.up_model = up_model
 
     # def plot_filters(self):

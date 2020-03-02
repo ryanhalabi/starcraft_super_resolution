@@ -77,6 +77,7 @@ class SRModel:
             add_layer = keras.layers.add([conv_3, upscaler])
 
             # add a depad layer, this removes the extra pixels on the edges
+            # TODO: Why'd didn't I make this this just (self.conv_size)?
             depad_filter_size = 2 * self.conv_size - self.scaling
             depad_kernel = np.zeros(
                 [depad_filter_size, depad_filter_size, self.channels, self.channels]
