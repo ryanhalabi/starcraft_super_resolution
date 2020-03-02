@@ -8,6 +8,7 @@ pip install -e  starcraft_super_resolution/
 ```
 
 **Execute**
+
 `python starcraft_super_resolution/run.py`
 
 **Display Results**
