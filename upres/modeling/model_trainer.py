@@ -37,6 +37,7 @@ class ModelTrainer:
 
         if self.sr_model.iteration == 0:
             self.log_images(self.Y, override_step=-1)
+            self.log_images(self.X, override_step=-2)
 
         for i in range(batches):
             iteration_path = self.sr_model.log_path / str(self.sr_model.iteration)
