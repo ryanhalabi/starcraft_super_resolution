@@ -1,13 +1,15 @@
 # starcraft_super_resolution
 Project to upscale Starcraft images using Super Resolution techniques.
 
-**Load Data**
-
-Run the `download_unit_images` function in `upres/utils/image.py`
+**Install Package and Requirements**
+```
+pip install -r  starcraft_super_resolution/requirements.txt
+pip install -e  starcraft_super_resolution/
+```
 
 **Execute**
 
-`python3 run.py`
+`python starcraft_super_resolution/run.py`
 
 **Display Results**
 
