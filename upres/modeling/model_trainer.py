@@ -86,9 +86,9 @@ class ModelTrainer:
         file_writer = tf.summary.create_file_writer(str(self.sr_model.images_path))
 
         # for some reason tensorboard is BGR not RGB?
-        x = np.copy(images)
-        images[:, :, :, 0] = x[:, :, :, 2]
-        images[:, :, :, 2] = x[:, :, :, 0]
+        # x = np.copy(images)
+        # images[:, :, :, 0] = x[:, :, :, 2]
+        # images[:, :, :, 2] = x[:, :, :, 0]
 
         with file_writer.as_default():
             tf.summary.image(
