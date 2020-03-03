@@ -23,7 +23,10 @@ class ModelTrainer:
 
     def __init__(self, sr_model):
         self.sr_model = sr_model
-        self.set_up_res_model()
+        self.set_upscale_model()
+
+        # The # of points we truncate off the edges of the NN output.
+        self.padding = int((self.sr_model.max_kernel_size - 1) / 2)
 
     def train(self, images, epochs, batches, log=True):
         train_images = images
@@ -33,13 +36,12 @@ class ModelTrainer:
         )
 
         y = np.array([x.get_array() for x in train_images])
-        padding = int((self.sr_model.conv_size - 1) / 2)
-        self.Y = y[:, padding:-padding, padding:-padding, :]
+        self.Y = y[:, self.padding : -self.padding, self.padding : -self.padding, :]
 
         if self.sr_model.iteration == 0:
             self.log_initial_images()
 
-        for i in range(batches):
+        for _ in range(batches):
             iteration_path = self.sr_model.log_path / str(self.sr_model.iteration)
             if os.path.isdir(iteration_path):
                 shutil.rmtree(iteration_path)
@@ -57,7 +59,7 @@ class ModelTrainer:
             if log:
                 self.predict(images, self.sr_model.iteration)
             print(
-                f"Model iteration {self.sr_model.iteration} Loss: {self.sr_model.model.history.history['loss'][-1]}"
+                f"Model iteration {self.sr_model.iteration} Loss: {self.sr_model.model.history.history['loss'][-1]}\n\n"
             )
 
             self.sr_model.iteration += 1
@@ -72,20 +74,19 @@ class ModelTrainer:
         return preds
 
     def log_initial_images(self):
-        padding = int((self.sr_model.conv_size - 1) / 2)
         low_res = self.up_model.predict(self.X)
-        low_res = low_res[:,padding:-padding, padding:-padding, :]
+        low_res = low_res[
+            :, self.padding : -self.padding, self.padding : -self.padding, :
+        ]
         # low_res = np.array([ cv2.resize(self.X[i,:,:,:], (self.Y.shape[2], self.Y.shape[1])) for i in range(self.X.shape[0])])
         self.log_images(low_res, override_step=-2)
         self.log_images(self.Y, override_step=-1)
-
-
 
     def log_images(self, images, override_step=None):
         step = override_step if override_step else self.sr_model.iteration
         file_writer = tf.summary.create_file_writer(str(self.sr_model.images_path))
 
-        # for some reason tensorboard is BGR not RGB?
+        # # for some reason tensorboard is BGR not RGB?
         # x = np.copy(images)
         # images[:, :, :, 0] = x[:, :, :, 2]
         # images[:, :, :, 2] = x[:, :, :, 0]
@@ -95,7 +96,7 @@ class ModelTrainer:
                 self.sr_model.name, images / 255, max_outputs=25, step=step
             )
 
-    def set_up_res_model(self):
+    def set_upscale_model(self):
         """
         This sets up a simple upscaling CNN to compare against.
         """

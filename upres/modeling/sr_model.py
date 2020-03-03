@@ -16,15 +16,17 @@ class SRModel:
     """
 
     def __init__(
-        self, name, input_shape, scaling=5, channels=1, conv_size=9, overwrite=False
+        self, name, input_shape, layers, scaling=5, channels=1, overwrite=False,
     ):
-
+        assert scaling % 2 != 0, "Scaling factor must be odd"
         self.name = name
         self.model_path = env.output / self.name
         self.scaling = scaling
         self.channels = channels
-        self.conv_size = conv_size
+        self.conv_size = 2 * self.scaling - 1
         self.input_shape = input_shape
+        self.layers = layers
+        self.max_kernel_size = max([x.kernel_size[0] for x in self.layers])
         self.set_optimizer()
 
         if overwrite and os.path.isdir(self.model_path):
@@ -51,56 +53,7 @@ class SRModel:
             self.load_model(model_files)
         else:
 
-            inputs = keras.layers.Input(
-                shape=(self.input_shape[0], self.input_shape[1], self.channels)
-            )
-
-            # upscaler
-            upscaler = keras.layers.Conv2DTranspose(
-                self.channels,
-                (self.conv_size, self.conv_size),
-                strides=(self.scaling, self.scaling),
-            )(inputs)
-
-            # trainable paramters
-            conv_1 = keras.layers.Conv2D(
-                64, (9, 9), strides=(1, 1), padding="same", activation="relu"
-            )(upscaler)
-            conv_2 = keras.layers.Conv2D(
-                32, (1, 1), strides=(1, 1), padding="same", activation="relu"
-            )(conv_1)
-            conv_3 = keras.layers.Conv2D(
-                self.channels, (5, 5), strides=(1, 1), padding="same"
-            )(conv_2)
-
-            # combine upscale + trainable parameters, we predict residual
-            add_layer = keras.layers.add([conv_3, upscaler])
-
-            # add a depad layer, this removes the extra pixels on the edges
-            # TODO: Why'd didn't I make this this just (self.conv_size)?
-            depad_filter_size = 2 * self.conv_size - self.scaling
-            depad_kernel = np.zeros(
-                [depad_filter_size, depad_filter_size, self.channels, self.channels]
-            )
-            center = int(depad_kernel.shape[0] / 2)
-            for i in range(self.channels):
-                depad_kernel[center, center, i, i] = 1
-
-            depad_bias = np.zeros([self.channels])
-
-            predictions = keras.layers.Conv2D(
-                self.channels,
-                (depad_filter_size, depad_filter_size),
-                strides=(1, 1),
-                weights=[depad_kernel, depad_bias],
-                trainable=False,
-            )(add_layer)
-
-            # finalize model
-            model = keras.Model(inputs=inputs, outputs=predictions)
-            model.compile(self.optimizer, "mean_squared_error")
-
-            self.model = model
+            self.model = self.make_model()
             self.iteration = 0
 
             if not os.path.isdir(self.model_path):
@@ -114,6 +67,73 @@ class SRModel:
         self.images_path = self.model_path / "images"
 
         print(f"Loaded model {self.name}, iteration {self.iteration}.")
+
+    def make_model(self):
+
+        inputs = keras.layers.Input(
+            shape=(self.input_shape[0], self.input_shape[1], self.channels)
+        )
+
+        # upscaler
+        upscaler = keras.layers.Conv2DTranspose(
+            self.channels,
+            (self.conv_size, self.conv_size),
+            strides=(self.scaling, self.scaling),
+        )(inputs)
+
+        # trainable paramters
+        last_layer = self.apply_layers(upscaler)
+
+        # combine upscale + trainable parameters, we predict residual
+        add_layer = keras.layers.add([last_layer, upscaler])
+
+        depad_layer = self.make_depad_layer()
+        predictions = depad_layer(add_layer)
+
+        # finalize model
+        model = keras.Model(inputs=inputs, outputs=predictions)
+        model.compile(self.optimizer, "mean_squared_error")
+
+        return model
+
+    def apply_layers(self, input):
+
+        first_layer = self.layers[0]
+        previous_layer = first_layer(input)
+
+        for layer in self.layers[1:]:
+            previous_layer = layer(previous_layer)
+
+        return previous_layer
+
+    def make_depad_layer(self):
+        """
+        Removes ghost points from conv2d and points that are influenced by ghost points from convolutions.
+
+        self.conv_size - self.scaling + 1: removes the ghost points from conv2d 
+        self.max_kernel_size - 1: removes any points that are influenced by boundary bad points from conv2d
+        """
+        depad_filter_size = (self.conv_size - self.scaling + 1) + (
+            self.max_kernel_size - 1
+        )
+        depad_kernel = np.zeros(
+            [depad_filter_size, depad_filter_size, self.channels, self.channels]
+        )
+        center = int(depad_kernel.shape[0] / 2)
+        for i in range(self.channels):
+            depad_kernel[center, center, i, i] = 1
+
+        depad_bias = np.zeros([self.channels])
+
+        depad_layer = keras.layers.Conv2D(
+            self.channels,
+            (depad_filter_size, depad_filter_size),
+            strides=(1, 1),
+            weights=[depad_kernel, depad_bias],
+            trainable=False,
+        )
+
+        return depad_layer
 
     def set_optimizer(self):
         self.optimizer = keras.optimizers.Adam()
