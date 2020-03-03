@@ -8,10 +8,11 @@ from pathlib import Path
 
 
 class Image:
-    def __init__(self, path: Path, greyscale: bool):
+    def __init__(self, path: Path, greyscale: bool, scaling: int):
         self.path = path
         self.greyscale = greyscale
         self.read_type = cv2.IMREAD_GRAYSCALE if greyscale else cv2.IMREAD_COLOR
+        self.scaling = scaling
 
     @property
     def name(self):
@@ -19,17 +20,36 @@ class Image:
 
     def get_array(self, scale=1):
         array = cv2.imread(str(self.path), self.read_type)
-        array = cv2.resize(
-            array, (int(array.shape[1] * scale), int(array.shape[0] * scale))
+
+        # resize original image so it can be be scaled without fractions
+        x_extra = array.shape[0] % self.scaling
+        y_extra = array.shape[1] % self.scaling
+
+        x_extra = self.scaling - x_extra if x_extra != 0 else x_extra
+        y_extra = self.scaling - y_extra if y_extra != 0 else y_extra
+
+        padded_array = cv2.resize(
+            array, (int(array.shape[0] + x_extra), int(array.shape[1] + y_extra))
         )
+
+        # scale image
+        resized_array = cv2.resize(
+            padded_array,
+            (int(padded_array.shape[1] * scale), int(padded_array.shape[0] * scale)),
+        )
+
+        # cv2 reads in array as BGR, tensorboard shows as RGB
+        x = np.copy(resized_array)
+        resized_array[:, :, 0] = x[:, :, 2]
+        resized_array[:, :, 2] = x[:, :, 0]
 
         # cv2.imshow('image',array)
         # cv2.waitKey(0)
         # cv2.destroyAllWindows()
 
         if self.greyscale:
-            array = np.expand_dims(array, 2)
-        return array
+            resized_array = np.expand_dims(resized_array, 2)
+        return resized_array
 
 
 def download_images(urls):
