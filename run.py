@@ -22,11 +22,11 @@ greyscale = False
 channels = 1 if greyscale else 3
 
 
-frame_files = [x for x in os.listdir(env.frames) if x != ".gitignore"]
-frame_images = [
-    Image(env.frames / x, greyscale=greyscale, scaling=scaling) for x in frame_files
-]
-frame_shape = tuple(frame_images[0].get_array(1 / scaling).shape)
+# frame_files = [x for x in os.listdir(env.frames) if x != ".gitignore"]
+# frame_images = [
+#     Image(env.frames / x, greyscale=greyscale, scaling=scaling) for x in frame_files
+# ]
+# frame_shape = tuple(frame_images[0].get_array(1 / scaling).shape)
 
 
 unit_files = [x for x in os.listdir(env.units) if x != ".gitignore"]
