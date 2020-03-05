@@ -1,6 +1,6 @@
 import os
 
-import keras
+from tensorflow import keras
 import numpy as np
 
 from upres.modeling.model_trainer import ModelTrainer

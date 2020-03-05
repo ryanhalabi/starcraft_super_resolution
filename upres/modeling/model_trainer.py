@@ -1,19 +1,19 @@
-import keras
-import numpy as np
-import requests
-import re
-
 # import matplotlib.pyplot as plt
 import os
-from upres.utils.environment import env
-from upres.modeling.sr_model import SRModel
-from upres.utils.image import Image
-from upres.utils.environment import env
-import uuid
+import re
 import shutil
-import tensorflow as tf
+import uuid
+
 import cv2
-from keras.callbacks import TensorBoard
+import numpy as np
+import requests
+import tensorflow as tf
+from tensorflow import keras
+from tensorflow.keras.callbacks import TensorBoard
+
+from upres.modeling.sr_model import SRModel
+from upres.utils.environment import env
+from upres.utils.image import Image
 
 
 class ModelTrainer:
