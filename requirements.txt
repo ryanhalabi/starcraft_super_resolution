@@ -26,7 +26,6 @@ python-dateutil==2.8.1
 pytube==9.6.0
 pytube3==9.6.4
 pytz==2019.3
-PyYAML==5.3
 requests==2.23.0
 requests-oauthlib==1.3.0
 rsa==4.0
