@@ -6,4 +6,3 @@ pytube3==9.6.4
 tensorflow==2.1.0
 requests==2.21.0
 opencv_python==4.1.0.25
-pytube==9.6.0
