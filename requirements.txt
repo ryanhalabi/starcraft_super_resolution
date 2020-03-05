@@ -2,6 +2,7 @@ pandas==0.24.2
 numpy==1.18.1
 Keras==2.3.1
 boto3==1.12.11
+pytube==9.6.0
 pytube3==9.6.4
 tensorflow==2.0.0
 requests==2.21.0
