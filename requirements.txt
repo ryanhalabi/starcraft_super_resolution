@@ -4,7 +4,7 @@ Keras==2.3.1
 boto3==1.12.11
 pytube==9.6.0
 pytube3==9.6.4
-tensorflow==2.0.0
+tensorflow==2.0.1
 requests==2.21.0
 opencv_python==4.1.0.25
 pytube==9.6.0
