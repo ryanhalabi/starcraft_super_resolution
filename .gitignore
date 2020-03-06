@@ -3,6 +3,6 @@
 /upres.egg-info/*
 /upres/build/*
 /upres/dist/*
-launch.py
 __init__.pyc*
 __pycache__*
+.env

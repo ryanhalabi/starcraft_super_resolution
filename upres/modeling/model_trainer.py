@@ -84,12 +84,9 @@ class ModelTrainer:
 
     def log_images(self, images, override_step=None):
         step = override_step if override_step else self.sr_model.iteration
-        file_writer = tf.summary.create_file_writer(str(self.sr_model.images_path))
-
-        # # for some reason tensorboard is BGR not RGB?
-        # x = np.copy(images)
-        # images[:, :, :, 0] = x[:, :, :, 2]
-        # images[:, :, :, 2] = x[:, :, :, 0]
+        file_writer = tf.summary.create_file_writer(
+            str(self.sr_model.images_path), filename_suffix=f"_{step}.v2"
+        )
 
         with file_writer.as_default():
             tf.summary.image(
