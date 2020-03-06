@@ -51,8 +51,6 @@ mt = ModelTrainer(sr_model)
 mt.train(unit_images, epochs=50, batches=10000)
 
 
-
-
 # FRAMES
 
 # layers = [
@@ -60,7 +58,7 @@ mt.train(unit_images, epochs=50, batches=10000)
 #     keras.layers.Conv2D(64, (1, 1), strides=(1, 1), padding="same", activation="relu"),
 #     keras.layers.Conv2D(channels, (5, 5), strides=(1, 1), padding="same"),
 # ]
-# 
+#
 # sr_model = SRModel(
 #     "color",
 #     frame_shape,

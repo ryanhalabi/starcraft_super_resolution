@@ -6,6 +6,7 @@ from upres import data
 
 load_dotenv()
 
+
 class Environment(object):
     def __init__(self):
         pwd = data.__file__
