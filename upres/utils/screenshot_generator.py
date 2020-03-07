@@ -1,6 +1,8 @@
-from pytube import YouTube
 import os
+
 import cv2
+from pytube import YouTube
+
 from upres.utils.environment import env
 
 

@@ -1,10 +1,12 @@
-import cv2
-import numpy as np
 import os
 import re
-import requests
-from upres.utils.environment import env
 from pathlib import Path
+
+import cv2
+import numpy as np
+import requests
+
+from upres.utils.environment import env
 
 
 class Image:
