@@ -17,9 +17,11 @@ ami_id = "ami-07bff1635c6a912a7"
 
 
 # MODEL SETTINGS - Change these to configure your model.
-name = "color_units"
+# name = "color_units"
+name = "test"
 dataset = "units"
-layers = "128,11 256,1 19"
+# layers = "128,11 256,1 19"
+layers = "19"
 scaling = 5
 epochs = 20000000000
 epochs_per = 200
@@ -54,6 +56,7 @@ python3 /starcraft_super_resolution/run.py --name {name} --dataset {dataset} --l
 '
 """
 
+print(gpu_user_data)
 # python3 ./starcraft_super_resolution/run.py --name color_units --dataset units --layers 128,11 256,1 19 --scaling 5 --epochs 200 --batches 1000 --overwrite True
 # watch -n 2 nvidia-smi
 

@@ -3,7 +3,6 @@ import os
 import re
 import shutil
 import uuid
-import subprocess
 
 import cv2
 import numpy as np

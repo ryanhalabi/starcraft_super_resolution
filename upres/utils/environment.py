@@ -1,7 +1,8 @@
-import boto3
 import os
+import subprocess
 from pathlib import Path
 
+import boto3
 from dotenv import load_dotenv
 
 from upres import data
