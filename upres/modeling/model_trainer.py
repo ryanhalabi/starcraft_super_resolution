@@ -56,6 +56,8 @@ class ModelTrainer:
 
         callbacks = [tensorboard_callback, custom_callback] if log else []
 
+        import pdb
+        pdb.set_trace()
         self.sr_model.model.fit(
             self.X, self.Y, epochs=epochs, batch_size=batch_size, verbose=1, callbacks=callbacks,
         )

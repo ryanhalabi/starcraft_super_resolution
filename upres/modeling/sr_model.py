@@ -93,6 +93,8 @@ class SRModel:
 
     def make_model(self):
 
+        import pdb
+        pdb.set_trace()
         inputs = keras.layers.Input(
             shape=(self.input_shape[0], self.input_shape[1], self.channels)
         )

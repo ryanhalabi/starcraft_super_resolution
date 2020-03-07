@@ -24,7 +24,7 @@ scaling = 5
 epochs = 20000000000
 batch_size = 16
 epochs_per = 200
-overwrite = False
+overwrite = True
 
 gpu_user_data = f"""#!/bin/bash
 export PATH=$PATH:/home/ec2-user/anaconda3/bin
