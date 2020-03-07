@@ -3,6 +3,7 @@ import os
 import re
 import shutil
 import uuid
+import subprocess
 
 import cv2
 import numpy as np
@@ -129,18 +130,12 @@ def log_images(images, model_name, images_path, epoch, start_epoch=0):
             model_name, images / 255, max_outputs=25, step=start_epoch + epoch,
         )
 
-    s3_upload_objects(env.data_path)
+    sync_with_s3(env.data_path)
 
 
-def s3_upload_objects(root_path):
-    try:
-        for path, subdirs, files in os.walk(root_path):
-            path = path.replace("\\", "/")
-            directory_name = path.replace(root_path, "")
-            for file in files:
-                env.s3_bucket.upload_file(
-                    os.path.join(path, file), directory_name + "/" + file
-                )
+def sync_with_s3(root_path):
+    bucket_uri = f"s3://{env.aws_s3_bucket_name}"
 
-    except Exception as err:
-        print(err)
+    sync_bash_command = f"{root_path} {bucket_uri}"
+
+    subprocess.run(sync_bash_command)
