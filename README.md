@@ -4,8 +4,8 @@ Project to upscale Starcraft images using Super Resolution techniques.
 ---
 #### Install Package and Requirements
 ```
-pip install -r  starcraft_super_resolution/requirements.txt
-pip install -e  starcraft_super_resolution/
+pip install -r starcraft_super_resolution/requirements.txt
+pip install -e starcraft_super_resolution/
 ```
 
 ---
