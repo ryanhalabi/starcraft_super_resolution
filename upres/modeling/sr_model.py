@@ -37,7 +37,7 @@ class SRModel:
         """
 
         assert scaling % 2 != 0, "Scaling factor must be odd"
-        assert all([x.kernel_size[0] % 2 != 0 for x in self.layers]), "All kernels must be odd sized"
+        assert all([x.kernel_size[0] % 2 != 0 for x in layers]), "All kernels must be odd sized"
 
         self.name = name
         self.model_path = env.output / self.name
