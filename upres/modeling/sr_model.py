@@ -13,11 +13,31 @@ import shutil
 class SRModel:
     """
     Customizable super resolution model
+
+
     """
 
     def __init__(
         self, name, input_shape, layers, scaling=5, channels=1, overwrite=False,
     ):
+        """
+        Parameters
+        ----------
+        name : str
+            Name of model, used when saving outputs.
+        input_shape : (width, height)
+            Shape of inputs, used when building input layer.
+        layers : [keras.Layer]
+            List of Keras layers used in middle of network.
+        scaling : odd int
+            Downscaling to apply to images before attempting to recreation.
+        channels : int, 3 or 1
+            Number of output channels, color = 3, greyscale = 1.
+        overwrite : bool
+            If True, remove all data for model of given name and start fresh.
+            If False, will attempt to load.
+        """
+
         assert scaling % 2 != 0, "Scaling factor must be odd"
         self.name = name
         self.model_path = env.output / self.name
@@ -26,21 +46,15 @@ class SRModel:
         self.conv_size = 2 * self.scaling - 1
         self.input_shape = input_shape
         self.layers = layers
+
         self.max_kernel_size = max([x.kernel_size[0] for x in self.layers])
         self.set_optimizer()
 
         if overwrite and os.path.isdir(self.model_path):
             shutil.rmtree(self.model_path)
+            print(f"Removed existing {self.name} model data.")
 
         self.create_or_load_model()
-
-    def load_model(self, model_files):
-
-        iteration = max([int(re.findall(r"_(\d+).hdf5", x)[0]) for x in model_files])
-        model_file_path = self.model_path / "models" / f"{self.name}_{iteration}.hdf5"
-
-        self.iteration = iteration
-        self.model = keras.models.load_model(str(model_file_path))
 
     def create_or_load_model(self):
 
@@ -66,7 +80,14 @@ class SRModel:
         self.log_path = self.model_path / "logs"
         self.images_path = self.model_path / "images"
 
-        print(f"Loaded model {self.name}, iteration {self.iteration}.")
+    def load_model(self, model_files):
+
+        iteration = max([int(re.findall(r"_(\d+).hdf5", x)[0]) for x in model_files])
+        model_file_path = self.model_path / "models" / f"{self.name}_{iteration}.hdf5"
+
+        self.iteration = iteration
+        print(f"Loading model {self.name}_{iteration}.hdf5")
+        self.model = keras.models.load_model(str(model_file_path))
 
     def make_model(self):
 
@@ -93,6 +114,8 @@ class SRModel:
         # finalize model
         model = keras.Model(inputs=inputs, outputs=predictions)
         model.compile(self.optimizer, "mean_squared_error")
+
+        print(f"Created new model: {self.name}")
 
         return model
 

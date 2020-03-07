@@ -6,3 +6,4 @@
 __init__.pyc*
 __pycache__*
 .env
+*.pyc

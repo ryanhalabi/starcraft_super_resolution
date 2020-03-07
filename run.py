@@ -1,7 +1,8 @@
+import argparse
 import os
 
-from tensorflow import keras
 import numpy as np
+from tensorflow import keras
 
 from upres.modeling.model_trainer import ModelTrainer
 from upres.modeling.sr_model import SRModel
@@ -9,65 +10,119 @@ from upres.utils.environment import env
 from upres.utils.image import Image, download_unit_images
 from upres.utils.screenshot_generator import download_video_frames
 
-# download unit images if empty
-if len(os.listdir(env.units)) == 1:
-    download_unit_images()
 
-# download frame images if empty
-# if len(os.listdir(env.frames)) == 1:
-#     download_video_frames()
+def download_images(units_or_frames, greyscale, scaling):
+    if units_or_frames == "units":
+        if len(os.listdir(env.units)) == 1:
+            download_unit_images()
 
-scaling = 5
-greyscale = False
-channels = 1 if greyscale else 3
+    elif units_or_frames == "frames":
+        if len(os.listdir(env.frames)) == 1:
+            download_video_frames()
 
+    image_path = env.units if units_or_frames == "units" else env.frames
 
-# frame_files = [x for x in os.listdir(env.frames) if x != ".gitignore"]
-# frame_images = [
-#     Image(env.frames / x, greyscale=greyscale, scaling=scaling) for x in frame_files
-# ]
-# frame_shape = tuple(frame_images[0].get_array(1 / scaling).shape)
+    image_files = [x for x in os.listdir(image_path) if x != ".gitignore"]
+    images = [
+        Image(image_path / x, greyscale=greyscale, scaling=scaling) for x in image_files
+    ]
 
-
-unit_files = [x for x in os.listdir(env.units) if x != ".gitignore"]
-unit_images = [
-    Image(env.units / x, greyscale=greyscale, scaling=scaling) for x in unit_files
-]
-unit_shape = tuple(unit_images[0].get_array(1 / scaling).shape)
-
-# UNITS
-
-layers = [
-    keras.layers.Conv2D(64, (9, 9), strides=(1, 1), padding="same", activation="relu"),
-    keras.layers.Conv2D(128, (1, 1), strides=(1, 1), padding="same", activation="relu"),
-    keras.layers.Conv2D(channels, (5, 5), strides=(1, 1), padding="same"),
-]
-
-sr_model = SRModel(
-    "color", unit_shape, layers, channels=channels, scaling=scaling, overwrite=False,
-)
-
-mt = ModelTrainer(sr_model)
-mt.train(unit_images, epochs=50, batches=10000)
+    return images
 
 
-# FRAMES
+def build_keras_layers(layers, channels):
+    # build middle layers
+    keras_layers = []
+    for layer in layers[:-1]:
+        num_filters, conv_size = [int(x) for x in layer.split(",")]
+        keras_layer = keras.layers.Conv2D(
+            num_filters,
+            (conv_size, conv_size),
+            strides=(1, 1),
+            padding="same",
+            activation="relu",
+        )
 
-# layers = [
-#     keras.layers.Conv2D(32, (9, 9), strides=(1, 1), padding="same", activation="relu"),
-#     keras.layers.Conv2D(64, (1, 1), strides=(1, 1), padding="same", activation="relu"),
-#     keras.layers.Conv2D(channels, (5, 5), strides=(1, 1), padding="same"),
-# ]
-#
-# sr_model = SRModel(
-#     "color",
-#     frame_shape,
-#     layers,
-#     channels=channels,
-#     scaling=scaling,
-#     overwrite=False,
-# )
+        keras_layers.append(keras_layer)
 
-# mt = ModelTrainer(sr_model)
-# # mt.train(images, epochs=0, batches=0, log=False)
-# mt.train(images, epochs=50, batches=10000)
+    # make last layer have appropriate channel size
+    conv_size = int(layers[-1])
+    keras_layer = keras.layers.Conv2D(
+        channels,
+        (conv_size, conv_size),
+        strides=(1, 1),
+        padding="same",
+        activation="relu",
+    )
+
+    keras_layers.append(keras_layer)
+
+    return keras_layers
+
+
+def make_parser():
+    parser = argparse.ArgumentParser(
+        description="Construct and train a super resolution network"
+    )
+    parser.add_argument("--name", help="Name of model", required=True)
+    parser.add_argument("--dataset", help="Units or Frames", required=True)
+    parser.add_argument(
+        "--layers", help="Middle layers architecture", required=True, nargs="*"
+    )
+    parser.add_argument("--scaling", help="Scaling of image", required=True, type=int)
+    parser.add_argument(
+        "--epochs", help="How many epochs to train per batch", required=True, type=int
+    )
+    parser.add_argument(
+        "--batches", help="How many batches to train", required=True, type=int
+    )
+    parser.add_argument("--greyscale", help="greyscale?", default=False, type=bool)
+    parser.add_argument(
+        "--overwrite",
+        help="Whether to overwrite existing model data",
+        default=False,
+        type=bool,
+    )
+
+    return parser
+
+
+# python3 run.py --h
+
+# python3 run.py --name color_units --dataset units --layers 69,9 128,1 5 \
+# --scaling 5 --epochs 1 --batches 2 --overwrite True
+
+if __name__ == "__main__":
+
+    parser = make_parser()
+    arguments = parser.parse_args()
+
+    dataset = arguments.dataset
+    layers = arguments.layers
+    name = arguments.name
+    greyscale = arguments.greyscale
+    scaling = arguments.scaling
+    epochs = arguments.epochs
+    batches = arguments.batches
+    overwrite = arguments.overwrite
+
+    channels = 1 if greyscale else 3
+
+    keras_layers = build_keras_layers(layers, channels)
+
+    # get data
+    images = download_images(dataset, greyscale, scaling)
+    image_shape = tuple(images[0].get_array(1 / scaling).shape)
+
+    # build or load sr model
+    sr_model = SRModel(
+        name,
+        image_shape,
+        keras_layers,
+        channels=channels,
+        scaling=scaling,
+        overwrite=overwrite,
+    )
+
+    mt = ModelTrainer(sr_model)
+    mt.train(images, epochs=epochs, batches=batches)
