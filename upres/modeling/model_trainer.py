@@ -118,6 +118,9 @@ class CustomCallback(tf.keras.callbacks.Callback):
                 )
             )
 
+            env.sync_with_s3(env.data_path)
+
+
 
 def log_images(images, model_name, images_path, epoch, start_epoch=0):
     file_writer = tf.summary.create_file_writer(
@@ -129,4 +132,3 @@ def log_images(images, model_name, images_path, epoch, start_epoch=0):
             model_name, images / 255, max_outputs=25, step=start_epoch + epoch,
         )
 
-    env.sync_with_s3(env.data_path)

@@ -57,9 +57,6 @@ python3 /starcraft_super_resolution/run.py --name {name} --dataset {dataset} --l
 """
 
 print(gpu_user_data)
-# python3 ./starcraft_super_resolution/run.py --name color_units --dataset units --layers 128,11 256,1 19 --scaling 5 --epochs 200 --batches 1000 --overwrite True
-# watch -n 2 nvidia-smi
-
 
 # Create and run EC2 instance
 client = boto3.client("ec2", region_name=env.aws_availability_zone)
@@ -85,8 +82,9 @@ while not public_dns:
     response = client.describe_instances(InstanceIds=[instance_id])
     public_dns = response["Reservations"][0]["Instances"][0]["PublicDnsName"]
 
-print(f"""ssh -i "{env.aws_key_name}.pem" ec2-user@{public_dns}""")
-print(f"""{public_dns}:8080""")
+print(f"""SSH COMMAND\nssh -i "{env.aws_key_name}.pem" ec2-user@{public_dns}""")
+print(f"""TENSORBOARD\n{public_dns}:8080""")
+print("GPU USAGE\nwatch -n 2 nvidia-smi")
 
 input("Press enter to terminate instance.")
 terminate_response = client.terminate_instances(InstanceIds=[instance_id])
