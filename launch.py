@@ -19,7 +19,7 @@ ami_id = "ami-07bff1635c6a912a7"
 # MODEL SETTINGS - Change these to configure your model.
 name = "color_units"
 dataset = "units"
-layers = '128,12 256,1 20'
+layers = '128,12 256,1 19'
 scaling = 5
 epochs = 200
 batches = 1000
