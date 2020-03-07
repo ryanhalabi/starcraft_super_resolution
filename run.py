@@ -1,5 +1,6 @@
 import argparse
 import os
+import random
 
 import numpy as np
 from tensorflow import keras
@@ -22,7 +23,8 @@ def download_images(units_or_frames, greyscale, scaling):
 
     image_path = env.units if units_or_frames == "units" else env.frames
 
-    image_files = [x for x in os.listdir(image_path) if x != ".gitignore"]
+    # this so we don't see sequential images in tensorboard 
+    image_files = random.shuffle([x for x in os.listdir(image_path) if x != ".gitignore"])
     images = [
         Image(image_path / x, greyscale=greyscale, scaling=scaling) for x in image_files
     ]
