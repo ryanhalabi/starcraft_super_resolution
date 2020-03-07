@@ -9,6 +9,7 @@ training, and host a Tensorboard dashboard.
 
 # instance_type = "t2.micro"
 instance_type = "g4dn.xlarge"
+instance_type = "p3.2xlarge"
 
 # dl amazon linux ami
 ami_id = "ami-07bff1635c6a912a7"
