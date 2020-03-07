@@ -74,7 +74,7 @@ def make_parser():
         "--epochs", help="How many epochs to train on", default=10, type=int
     )
     parser.add_argument(
-        "--epochs_per", help="How many epochs we train on before output images", default=1, type=int
+        "--epochs_per", help="How many epochs we train on before output images and save model", default=1, type=int
     )
     parser.add_argument("--greyscale", help="greyscale?", default=False, type=bool)
     parser.add_argument(
