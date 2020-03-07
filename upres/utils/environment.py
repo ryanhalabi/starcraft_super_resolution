@@ -21,12 +21,21 @@ class Environment(object):
 
         self.aws_security_group_id = os.getenv("security_group_id")
         self.aws_availability_zone = os.getenv("availability_zone")
-        self.aws_s3_bucket_name = "starcraft-super-resolution-data"
+        self.aws_access_key_id = os.getenv("aws_access_key_id")
+        self.aws_secret_access_key = os.getenv("aws_secret_access_key")
+        self.aws_s3_bucket_name = os.get_env("s3_bucket_name")
+        self.aws_s3_bucket_uri = f"s3://{self.aws_s3_bucket_name}"
 
         self.aws_subnet_id = os.getenv("subnet_id")
         self.aws_key_name = os.getenv("key_name")
         self.aws_vpc_id = os.getenv("vpc_id")
 
 
+    def sync_with_s3(self, root_path):
+        sync_bash_command = ["aws", "s3", "sync", self.data_path, self.aws_s3_bucket_uri]
+        subprocess.call(sync_bash_command)
 
-env = Environment()
+    def remove_s3_model_data(self, model_name):
+        sync_bash_command = ["aws", "s3", "rm", f"{aws_s3_bucket_uri}://output/{model_name}", "--recursive"]
+        subprocess.call(sync_bash_command)
+

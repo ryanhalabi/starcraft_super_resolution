@@ -36,6 +36,11 @@ python3 -m pip install --upgrade pip
 python3 -m pip install -r starcraft_super_resolution/requirements.txt
 python3 -m pip install -e starcraft_super_resolution/
 
+export aws_access_key_id={env.aws_access_key_id}
+export aws_secret_access_key={env.aws_secret_access_key}
+
+aws s3 sync /starcraft_super_resolution/upres/data {env.aws_s3_bucket_uri}
+
 screen -S tensorboard -d -m bash -c "/home/ec2-user/anaconda3/envs/tensorflow2_p36/bin/tensorboard \
 --logdir=/starcraft_super_resolution/upres --port=8080  --bind_all \
 --samples_per_plugin='images=0,scalars=0'"
