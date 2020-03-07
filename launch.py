@@ -42,7 +42,7 @@ screen -S training -d -m bash -c '\
 export PATH=$PATH:/home/ec2-user/anaconda3/bin; \
 source activate tensorflow2_p36; \
 python3 /starcraft_super_resolution/run.py --name {name} --dataset {dataset} --layers {layers} \
---scaling {scaling} --epochs {epochs} --epochs_per {epochs_per} --overwrite {overwrite} \
+--scaling {scaling} --epochs {epochs} --epochs_per {epochs_per} --overwrite {overwrite}\
 '
 """
 

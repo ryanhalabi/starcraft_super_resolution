@@ -79,9 +79,9 @@ def make_parser():
     parser.add_argument(
         "--epochs_per", help="How many epochs we train on before output images and save model", default=1, type=int
     )
-    parser.add_argument("--greyscale", help="greyscale?", default=False, type=bool)
+    parser.add_argument("--greyscale", help="greyscale?", default='False')
     parser.add_argument(
-        "--overwrite", help="Whether to overwrite existing model data", default=False
+        "--overwrite", help="Whether to overwrite existing model data", default='False'
     )
 
     return parser
@@ -100,7 +100,7 @@ if __name__ == "__main__":
     dataset = arguments.dataset
     layers = arguments.layers
     name = arguments.name
-    greyscale = arguments.greyscale
+    greyscale = False if arguments.greyscale == 'False' else True
     scaling = arguments.scaling
     epochs = arguments.epochs
     epochs_per = arguments.epochs_per
