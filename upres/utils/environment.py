@@ -28,7 +28,7 @@ class Environment(object):
         self.aws_vpc_id = os.getenv("vpc_id")
 
         s3 = boto3.client("s3", region_name=self.aws_availability_zone)
-        self.s3_bucket = s3.Bucket(self.aws_s3_bucket_name)
+        self.s3_bucket = s3.bucket(self.aws_s3_bucket_name)
 
 
 env = Environment()
