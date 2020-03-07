@@ -25,7 +25,7 @@ layers = "19"
 scaling = 5
 epochs = 20000000000
 epochs_per = 200
-overwrite = False
+overwrite = True
 
 gpu_user_data = f"""#!/bin/bash
 export PATH=$PATH:/home/ec2-user/anaconda3/bin
@@ -41,6 +41,7 @@ python3 -m pip install -e starcraft_super_resolution/
 export AWS_ACCESS_KEY_ID={env.aws_access_key_id}
 export AWS_SECRET_ACCESS_KEY={env.aws_secret_access_key}
 export AWS_DEFAULT_REGION={env.aws_availability_zone}
+export s3_bucket_name={env.aws_s3_bucket_name}
 
 aws s3 sync {env.aws_s3_bucket_uri} /starcraft_super_resolution/upres/data
 
@@ -82,9 +83,9 @@ while not public_dns:
     response = client.describe_instances(InstanceIds=[instance_id])
     public_dns = response["Reservations"][0]["Instances"][0]["PublicDnsName"]
 
-print(f"""SSH COMMAND\nssh -i "{env.aws_key_name}.pem" ec2-user@{public_dns}""")
-print(f"""TENSORBOARD\n{public_dns}:8080""")
-print("GPU USAGE\nwatch -n 2 nvidia-smi")
+print(f"""\nSSH COMMAND\nssh -i "{env.aws_key_name}.pem" ec2-user@{public_dns}""")
+print(f"""\nTENSORBOARD\n{public_dns}:8080""")
+print("\nGPU USAGE\nwatch -n 2 nvidia-smi")
 
 input("Press enter to terminate instance.")
 terminate_response = client.terminate_instances(InstanceIds=[instance_id])
