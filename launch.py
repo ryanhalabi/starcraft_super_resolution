@@ -30,6 +30,7 @@ export PATH=$PATH:/home/ec2-user/anaconda3/bin
 source activate tensorflow2_p36
 
 git clone https://github.com/ryanhalabi/starcraft_super_resolution
+git -C ./starcraft_super_resolution/ pull
 
 python3 -m pip install --upgrade pip
 python3 -m pip install -r starcraft_super_resolution/requirements.txt
