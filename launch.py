@@ -16,7 +16,7 @@ instance_type = "g4dn.xlarge"
 ami_id = "ami-07bff1635c6a912a7"
 
 
-# MODEL SETTINGS - Change these to c
+# MODEL SETTINGS - Change these to configure your model.
 name = "color_units"
 dataset = "units"
 layers = '128,12 256,1 20'
@@ -45,6 +45,7 @@ python3 /starcraft_super_resolution/run.py --name {name} --dataset {dataset} --l
 '
 """
 
+# python3 ./starcraft_super_resolution/run.py --name color_units --dataset units --layers 128,11 256,1 19 --scaling 5 --epochs 200 --batches 1000 --overwrite True
 # watch -n 2 nvidia-smi
 
 
