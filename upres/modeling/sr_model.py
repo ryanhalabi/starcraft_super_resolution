@@ -53,8 +53,12 @@ class SRModel:
         self.set_optimizer()
 
         if overwrite and os.path.isdir(self.model_path):
+            # remove locally model data
             shutil.rmtree(self.model_path)
             print(f"Removed existing {self.name} model data.")
+
+            # remove s3 stored model data
+            # env.s3_bucket.objects.filter(Prefix=self.model_path).delete()
 
         self.create_or_load_model()
 

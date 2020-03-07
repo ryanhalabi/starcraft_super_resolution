@@ -88,6 +88,10 @@ class ModelTrainer:
 
 
 class CustomCallback(tf.keras.callbacks.Callback):
+    """
+    Custom callback that saves the model and outputs images every 'epochs_per' epochs.
+    """
+
     def __init__(self, X, sr_model, epochs_per):
         super().__init__()
         self.X = X
@@ -102,8 +106,9 @@ class CustomCallback(tf.keras.callbacks.Callback):
 
         if epoch % self.epochs_per == 0:
             preds = self.model.predict(self.X)
-
-            log_images(preds, self.model_name, self.images_path, epoch, self.start_epoch)
+            log_images(
+                preds, self.model_name, self.images_path, epoch, self.start_epoch
+            )
 
             self.model.save(
                 str(
@@ -123,3 +128,19 @@ def log_images(images, model_name, images_path, epoch, start_epoch=0):
         tf.summary.image(
             model_name, images / 255, max_outputs=25, step=start_epoch + epoch,
         )
+
+    s3_upload_objects(env.data_path)
+
+
+def s3_upload_objects(root_path):
+    try:
+        for path, subdirs, files in os.walk(root_path):
+            path = path.replace("\\", "/")
+            directory_name = path.replace(root_path, "")
+            for file in files:
+                env.s3_bucket.upload_file(
+                    os.path.join(path, file), directory_name + "/" + file
+                )
+
+    except Exception as err:
+        print(err)

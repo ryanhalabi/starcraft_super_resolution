@@ -22,7 +22,7 @@ def download_images(units_or_frames, greyscale, scaling):
 
     image_path = env.units if units_or_frames == "units" else env.frames
 
-    # this so we don't see sequential images in tensorboard 
+    # this so we don't see sequential images in tensorboard
     image_files = [x for x in os.listdir(image_path) if x != ".gitignore"]
     images = [
         Image(image_path / x, greyscale=greyscale, scaling=scaling) for x in image_files
@@ -75,11 +75,14 @@ def make_parser():
         "--epochs", help="How many epochs to train on", default=10, type=int
     )
     parser.add_argument(
-        "--epochs_per", help="How many epochs we train on before output images and save model", default=1, type=int
+        "--epochs_per",
+        help="How many epochs we train on before output images and save model",
+        default=1,
+        type=int,
     )
-    parser.add_argument("--greyscale", help="greyscale?", default='False')
+    parser.add_argument("--greyscale", help="greyscale?", default="False")
     parser.add_argument(
-        "--overwrite", help="Whether to overwrite existing model data", default='False'
+        "--overwrite", help="Whether to overwrite existing model data", default="False"
     )
 
     return parser
@@ -98,7 +101,7 @@ if __name__ == "__main__":
     dataset = arguments.dataset
     layers = arguments.layers
     name = arguments.name
-    greyscale = False if arguments.greyscale == 'False' else True
+    greyscale = False if arguments.greyscale == "False" else True
     scaling = arguments.scaling
     epochs = arguments.epochs
     epochs_per = arguments.epochs_per
