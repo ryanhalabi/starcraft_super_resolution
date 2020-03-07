@@ -1,6 +1,9 @@
 ## Starcraft Super Resolution
 Project to upscale Starcraft images using Super Resolution techniques.
 
+Sources:   
+https://arxiv.org/pdf/1501.00092.pdf  
+https://arxiv.org/pdf/1808.03344.pdf
 
 ---
 #### Install Package and Requirements
