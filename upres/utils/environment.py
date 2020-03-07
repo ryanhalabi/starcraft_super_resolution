@@ -23,7 +23,7 @@ class Environment(object):
         self.aws_availability_zone = os.getenv("availability_zone")
         self.aws_access_key_id = os.getenv("aws_access_key_id")
         self.aws_secret_access_key = os.getenv("aws_secret_access_key")
-        self.aws_s3_bucket_name = os.get_env("s3_bucket_name")
+        self.aws_s3_bucket_name = os.getenv("s3_bucket_name")
         self.aws_s3_bucket_uri = f"s3://{self.aws_s3_bucket_name}"
 
         self.aws_subnet_id = os.getenv("subnet_id")
@@ -39,3 +39,4 @@ class Environment(object):
         sync_bash_command = ["aws", "s3", "rm", f"{aws_s3_bucket_uri}://output/{model_name}", "--recursive"]
         subprocess.call(sync_bash_command)
 
+env = Environment()
