@@ -23,7 +23,7 @@ layers = "128,11 256,1 19"
 scaling = 5
 epochs = 20000000000
 epochs_per = 200
-overwrite = True
+overwrite = False
 
 gpu_user_data = f"""#!/bin/bash
 export PATH=$PATH:/home/ec2-user/anaconda3/bin
