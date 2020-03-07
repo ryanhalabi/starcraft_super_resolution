@@ -19,10 +19,10 @@ ami_id = "ami-07bff1635c6a912a7"
 # MODEL SETTINGS - Change these to configure your model.
 name = "color_units"
 dataset = "units"
-layers = '128,11 256,1 19'
+layers = "128,11 256,1 19"
 scaling = 5
-epochs = 200
-batches = 1000
+epochs = 20000000000
+epochs_per = 200
 overwrite = True
 
 gpu_user_data = f"""#!/bin/bash
@@ -42,7 +42,7 @@ screen -S training -d -m bash -c '\
 export PATH=$PATH:/home/ec2-user/anaconda3/bin; \
 source activate tensorflow2_p36; \
 python3 /starcraft_super_resolution/run.py --name {name} --dataset {dataset} --layers {layers} \
---scaling {scaling} --epochs {epochs} --batches {batches} --overwrite {overwrite} \
+--scaling {scaling} --epochs {epochs} --epochs_per {epochs_per} --overwrite {overwrite} \
 '
 """
 

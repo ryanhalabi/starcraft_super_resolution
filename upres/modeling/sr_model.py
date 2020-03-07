@@ -37,7 +37,9 @@ class SRModel:
         """
 
         assert scaling % 2 != 0, "Scaling factor must be odd"
-        assert all([x.kernel_size[0] % 2 != 0 for x in layers]), "All kernels must be odd sized"
+        assert all(
+            [x.kernel_size[0] % 2 != 0 for x in layers]
+        ), "All kernels must be odd sized"
 
         self.name = name
         self.model_path = env.output / self.name
@@ -68,25 +70,24 @@ class SRModel:
         else:
 
             self.model = self.make_model()
-            self.iteration = 0
+            self.start_epoch = 0
 
             if not os.path.isdir(self.model_path):
                 os.mkdir(self.model_path)
                 os.mkdir(self.model_path / "models")
                 os.mkdir(self.model_path / "logs")
                 os.mkdir(self.model_path / "images")
-            self.save_model()
 
         self.log_path = self.model_path / "logs"
         self.images_path = self.model_path / "images"
 
     def load_model(self, model_files):
 
-        iteration = max([int(re.findall(r"_(\d+).hdf5", x)[0]) for x in model_files])
-        model_file_path = self.model_path / "models" / f"{self.name}_{iteration}.hdf5"
+        epoch = max([int(re.findall(r"_(\d+).hdf5", x)[0]) for x in model_files])
+        model_file_path = self.model_path / "models" / f"{self.name}_{epoch}.hdf5"
 
-        self.iteration = iteration
-        print(f"Loading model {self.name}_{iteration}.hdf5")
+        self.start_epoch = epoch + 1
+        print(f"Loading model {self.name}_{epoch}.hdf5")
         self.model = keras.models.load_model(str(model_file_path))
 
     def make_model(self):
@@ -160,8 +161,3 @@ class SRModel:
 
     def set_optimizer(self):
         self.optimizer = keras.optimizers.Adam()
-
-    def save_model(self):
-        self.model.save(
-            str(self.model_path / "models" / f"{self.name}_{self.iteration}.hdf5")
-        )

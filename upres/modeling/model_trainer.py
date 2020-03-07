@@ -9,7 +9,7 @@ import numpy as np
 import requests
 import tensorflow as tf
 from tensorflow import keras
-from tensorflow.keras.callbacks import TensorBoard
+from tensorflow.keras.callbacks import TensorBoard, Callback
 
 from upres.modeling.sr_model import SRModel
 from upres.utils.environment import env
@@ -28,70 +28,48 @@ class ModelTrainer:
         # The # of points we truncate off the edges of the NN output.
         self.padding = int((self.sr_model.max_kernel_size - 1) / 2)
 
-    def train(self, images, epochs, batches, log=True):
+    def train(self, images, epochs, epochs_per, log=True):
         train_images = images
 
         self.X = np.array(
             [x.get_array(1 / self.sr_model.scaling) for x in train_images]
         )
 
-        y = np.array([x.get_array() for x in train_images])
-        self.Y = y[:, self.padding : -self.padding, self.padding : -self.padding, :]
+        self.Y = np.array([x.get_array() for x in train_images])
+        if self.padding != 0:
+            self.Y = self.Y[
+                :, self.padding : -self.padding, self.padding : -self.padding, :
+            ]
 
-        if self.sr_model.iteration == 0:
+        if self.sr_model.start_epoch == 0:
             self.log_initial_images()
 
-        for _ in range(batches):
-            iteration_path = self.sr_model.log_path / str(self.sr_model.iteration)
-            if os.path.isdir(iteration_path):
-                shutil.rmtree(iteration_path)
-            os.mkdir(iteration_path)
+        epoch_log_path = self.sr_model.log_path / str(self.sr_model.start_epoch)
+        if os.path.isdir(epoch_log_path):
+            shutil.rmtree(epoch_log_path)
+        os.mkdir(epoch_log_path)
 
-            tensorboard_callback = TensorBoard(
-                log_dir=str(iteration_path), histogram_freq=1
-            )
-            callbacks = [tensorboard_callback] if log else []
+        tensorboard_callback = TensorBoard(
+            log_dir=str(epoch_log_path), histogram_freq=1
+        )
+        custom_callback = CustomCallback(self.X, self.sr_model, epochs_per)
 
-            self.sr_model.model.fit(
-                self.X, self.Y, epochs=epochs, verbose=1, callbacks=callbacks,
-            )
+        callbacks = [tensorboard_callback, custom_callback] if log else []
 
-            if log:
-                self.predict(images, self.sr_model.iteration)
-            print(
-                f"Model iteration {self.sr_model.iteration} Loss: {self.sr_model.model.history.history['loss'][-1]}\n\n"
-            )
-
-            self.sr_model.iteration += 1
-            self.sr_model.save_model()
-
-    def predict(self, images, step):
-        x = np.array([x.get_array(1 / self.sr_model.scaling) for x in images])
-        preds = self.sr_model.model.predict(x)
-
-        self.log_images(preds)
-
-        return preds
+        self.sr_model.model.fit(
+            self.X, self.Y, epochs=epochs, verbose=1, callbacks=callbacks,
+        )
 
     def log_initial_images(self):
         low_res = self.up_model.predict(self.X)
-        low_res = low_res[
-            :, self.padding : -self.padding, self.padding : -self.padding, :
-        ]
+        if self.padding != 0:
+            low_res = low_res[
+                :, self.padding : -self.padding, self.padding : -self.padding, :
+            ]
         # low_res = np.array([ cv2.resize(self.X[i,:,:,:], (self.Y.shape[2], self.Y.shape[1])) for i in range(self.X.shape[0])])
-        self.log_images(self.Y, override_step=-2)
-        self.log_images(low_res, override_step=-1)
 
-    def log_images(self, images, override_step=None):
-        step = override_step if override_step else self.sr_model.iteration
-        file_writer = tf.summary.create_file_writer(
-            str(self.sr_model.images_path), filename_suffix=f"_{step}.v2"
-        )
-
-        with file_writer.as_default():
-            tf.summary.image(
-                self.sr_model.name, images / 255, max_outputs=25, step=step
-            )
+        log_images(self.Y, self.sr_model.name, self.sr_model.images_path, -2)
+        log_images(low_res, self.sr_model.name, self.sr_model.images_path, -1)
 
     def set_upscale_model(self):
         """
@@ -108,30 +86,40 @@ class ModelTrainer:
 
         self.up_model = up_model
 
-    # def plot_filters(self):
 
-    #     weights = self.model.weights
-    #     for weight in weights:
-    #         for i in range( weight.shape[2]):
-    #             filter = weight[:,:,i,0]
-    #             plt.plot(filter)
-    #             plt.show()
+class CustomCallback(tf.keras.callbacks.Callback):
+    def __init__(self, X, sr_model, epochs_per):
+        super().__init__()
+        self.X = X
+        self.model_path = sr_model.model_path
+        self.images_path = sr_model.images_path
+        self.model_name = sr_model.name
 
-    # def save_initial(self, images):
-    #     image_names = [x.name for x in images]
+        self.start_epoch = sr_model.start_epoch
+        self.epochs_per = epochs_per
 
-    #     y = [x.get_array() for x in images]
-    #     padding = (self.model.conv_size - 1) // 2
-    #     y = [x[padding:-padding, padding:-padding, :] for x in y]
-    #     Y = np.array(y)
+    def on_epoch_begin(self, epoch, logs=None):
 
-    #     X = np.array([x.get_array(1 / self.model.scaling) for x in images])
+        if epoch % self.epochs_per == 0:
+            preds = self.model.predict(self.X)
 
-    #     up_samples = self.up_model.predict(X)
-    #     padding = int((self.model.conv_size - 1) / 2)
-    #     up_samples = np.array(
-    #         [x[padding:-padding, padding:-padding, :] for x in up_samples]
-    #     )
+            log_images(preds, self.model_name, self.images_path, epoch, self.start_epoch)
 
-    #     self.log_images(Y, 0)
-    #     self.log_images(up_samples, 0)
+            self.model.save(
+                str(
+                    self.model_path
+                    / "models"
+                    / f"{self.model_name}_{self.start_epoch + epoch}.hdf5"
+                )
+            )
+
+
+def log_images(images, model_name, images_path, epoch, start_epoch=0):
+    file_writer = tf.summary.create_file_writer(
+        str(images_path), filename_suffix=f"_{start_epoch + epoch}.v2"
+    )
+
+    with file_writer.as_default():
+        tf.summary.image(
+            model_name, images / 255, max_outputs=25, step=start_epoch + epoch,
+        )

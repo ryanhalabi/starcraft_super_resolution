@@ -64,24 +64,21 @@ def make_parser():
     parser = argparse.ArgumentParser(
         description="Construct and train a super resolution network"
     )
-    parser.add_argument("--name", help="Name of model", required=True)
-    parser.add_argument("--dataset", help="Units or Frames", required=True)
+    parser.add_argument("--name", help="Name of model", default="test_model")
+    parser.add_argument("--dataset", help="Units or Frames", default="units")
     parser.add_argument(
-        "--layers", help="Middle layers architecture", required=True, nargs="*"
+        "--layers", help="Middle layers architecture", default="1", nargs="*"
     )
-    parser.add_argument("--scaling", help="Scaling of image", required=True, type=int)
+    parser.add_argument("--scaling", help="Scaling of image", default=3, type=int)
     parser.add_argument(
-        "--epochs", help="How many epochs to train per batch", required=True, type=int
+        "--epochs", help="How many epochs to train on", default=10, type=int
     )
     parser.add_argument(
-        "--batches", help="How many batches to train", required=True, type=int
+        "--epochs_per", help="How many epochs we train on before output images", default=1, type=int
     )
     parser.add_argument("--greyscale", help="greyscale?", default=False, type=bool)
     parser.add_argument(
-        "--overwrite",
-        help="Whether to overwrite existing model data",
-        default=False,
-        type=bool,
+        "--overwrite", help="Whether to overwrite existing model data", default=False
     )
 
     return parser
@@ -103,8 +100,8 @@ if __name__ == "__main__":
     greyscale = arguments.greyscale
     scaling = arguments.scaling
     epochs = arguments.epochs
-    batches = arguments.batches
-    overwrite = arguments.overwrite
+    epochs_per = arguments.epochs_per
+    overwrite = False if arguments.overwrite == "False" else True
 
     channels = 1 if greyscale else 3
 
@@ -125,4 +122,4 @@ if __name__ == "__main__":
     )
 
     mt = ModelTrainer(sr_model)
-    mt.train(images, epochs=epochs, batches=batches)
+    mt.train(images, epochs=epochs, epochs_per=epochs_per)
