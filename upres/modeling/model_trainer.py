@@ -28,7 +28,7 @@ class ModelTrainer:
         # The # of points we truncate off the edges of the NN output.
         self.padding = int((self.sr_model.max_kernel_size - 1) / 2)
 
-    def train(self, images, epochs, epochs_per, log=True):
+    def train(self, images, epochs, batch_size, epochs_per, log=True):
         train_images = images
 
         self.X = np.array(
@@ -57,7 +57,7 @@ class ModelTrainer:
         callbacks = [tensorboard_callback, custom_callback] if log else []
 
         self.sr_model.model.fit(
-            self.X, self.Y, epochs=epochs, verbose=1, callbacks=callbacks,
+            self.X, self.Y, epochs=epochs, batch_size=batch_size, verbose=1, callbacks=callbacks,
         )
 
     def log_initial_images(self):

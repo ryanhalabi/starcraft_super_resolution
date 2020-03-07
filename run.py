@@ -75,6 +75,9 @@ def make_parser():
         "--epochs", help="How many epochs to train on", default=10, type=int
     )
     parser.add_argument(
+        "--batch_size", help="Training batch size", default=32, type=int
+    )
+    parser.add_argument(
         "--epochs_per",
         help="How many epochs we train on before output images and save model",
         default=1,
@@ -104,6 +107,7 @@ if __name__ == "__main__":
     greyscale = False if arguments.greyscale == "False" else True
     scaling = arguments.scaling
     epochs = arguments.epochs
+    batch_size = arguments.batch_size
     epochs_per = arguments.epochs_per
     overwrite = False if arguments.overwrite == "False" else True
 
@@ -126,4 +130,4 @@ if __name__ == "__main__":
     )
 
     mt = ModelTrainer(sr_model)
-    mt.train(images, epochs=epochs, epochs_per=epochs_per)
+    mt.train(images, epochs=epochs, batch_size=batch_size, epochs_per=epochs_per)
