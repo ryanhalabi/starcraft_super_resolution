@@ -1,6 +1,5 @@
 import argparse
 import os
-import random
 
 import numpy as np
 from tensorflow import keras
@@ -28,7 +27,6 @@ def download_images(units_or_frames, greyscale, scaling):
     images = [
         Image(image_path / x, greyscale=greyscale, scaling=scaling) for x in image_files
     ]
-    random.shuffle(images)
 
     return images
 
