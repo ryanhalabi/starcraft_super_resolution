@@ -79,8 +79,8 @@ class ModelTrainer:
             :, self.padding : -self.padding, self.padding : -self.padding, :
         ]
         # low_res = np.array([ cv2.resize(self.X[i,:,:,:], (self.Y.shape[2], self.Y.shape[1])) for i in range(self.X.shape[0])])
-        self.log_images(low_res, override_step=-2)
-        self.log_images(self.Y, override_step=-1)
+        self.log_images(self.Y, override_step=-2)
+        self.log_images(low_res, override_step=-1)
 
     def log_images(self, images, override_step=None):
         step = override_step if override_step else self.sr_model.iteration
