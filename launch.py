@@ -9,15 +9,23 @@ training, and host a Tensorboard dashboard.
 
 # instance_type = "t2.micro"
 instance_type = "g4dn.xlarge"
-instance_type = "p3.2xlarge"
+# instance_type = "g4dn.4xlarge"
+# instance_type = "p3.2xlarge"
 
 # dl amazon linux ami
 ami_id = "ami-07bff1635c6a912a7"
-# basic ami
-# ami_id = "ami-079f731edfe27c29c"
 
 
-gpu_user_data = """#!/bin/bash
+# MODEL SETTINGS - Change these to c
+name = "color_units"
+dataset = "units"
+layers = '128,12 256,1 20'
+scaling = 5
+epochs = 200
+batches = 1000
+overwrite = True
+
+gpu_user_data = f"""#!/bin/bash
 export PATH=$PATH:/home/ec2-user/anaconda3/bin
 source activate tensorflow2_p36
 
@@ -32,14 +40,15 @@ screen -S tensorboard -d -m bash -c "/home/ec2-user/anaconda3/envs/tensorflow2_p
 screen -S training -d -m bash -c '\
 export PATH=$PATH:/home/ec2-user/anaconda3/bin; \
 source activate tensorflow2_p36; \
-python3 /starcraft_super_resolution/run.py --name color_units --dataset units --layers 69,9 128,1 5 \
---scaling 5 --epochs 1 --batches 2 --overwrite True \
+python3 /starcraft_super_resolution/run.py --name {name} --dataset {dataset} --layers {layers} \
+--scaling {scaling} --epochs {epochs} --batches {batches} --overwrite {overwrite} \
 '
 """
 
 # watch -n 2 nvidia-smi
 
 
+# Create and run EC2 instance
 client = boto3.client("ec2", region_name=env.aws_availability_zone)
 ec2 = boto3.resource("ec2", region_name=env.aws_availability_zone)
 instance = ec2.create_instances(
