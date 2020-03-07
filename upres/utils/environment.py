@@ -35,8 +35,6 @@ class Environment(object):
     def sync_with_s3(self, root_path):
         sync_bash_command = ["aws", "s3", "sync", self.data_path, self.aws_s3_bucket_uri, "--delete"]
 
-        import pdb
-        pdb.set_trace()
         subprocess.call(sync_bash_command)
 
 env = Environment()
