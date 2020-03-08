@@ -88,6 +88,3 @@ print("\nGPU USAGE\nwatch -n 2 nvidia-smi")
 
 input("Press enter to terminate instance.")
 terminate_response = client.terminate_instances(InstanceIds=[instance_id])
-
-
-screen -S training -d -m bash -c 'export PATH=$PATH:/home/ec2-user/anaconda3/bin; source activate tensorflow2_p36; python3 /starcraft_super_resolution/run.py --name color_frames --dataset frames --layers 64,9 128,1 17 --scaling 5 --epochs 20000000000 --batch_size 32 --epochs_per 200 --overwrite True'
