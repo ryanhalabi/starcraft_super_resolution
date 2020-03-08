@@ -3,7 +3,6 @@ import re
 import shutil
 
 import numpy as np
-import tensorflow as tf
 from tensorflow import keras
 
 from upres.utils.environment import env
@@ -116,8 +115,7 @@ class SRModel:
 
         # finalize model
         model = keras.Model(inputs=inputs, outputs=predictions)
-        run_opts = tf.RunOptions(report_tensor_allocations_upon_oom = True)
-        model.compile(self.optimizer, "mean_squared_error", options = run_opts)
+        model.compile(self.optimizer, "mean_squared_error")
 
         print(f"Created new model: {self.name}")
 
