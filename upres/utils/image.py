@@ -31,7 +31,7 @@ class Image:
         y_extra = self.scaling - y_extra if y_extra != 0 else y_extra
 
         padded_array = cv2.resize(
-            array, (int(array.shape[1] + x_extra), int(array.shape[0] + y_extra))
+            array, (int(array.shape[1] + y_extra), int(array.shape[0] + x_extra))
         )
 
         # scale image
