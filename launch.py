@@ -20,14 +20,14 @@ ami_id = "ami-07bff1635c6a912a7"
 # units "128,11 256,1 19"
 # frames "64,9 128,1 17"
 
-name = "color_units"
+name = "color_units_2"
 dataset = "units"
 layers = "64,9 128,1 17"
 scaling = 5
 epochs = 20000000000
 batch_size = 32
 epochs_per = 2
-overwrite = True
+overwrite = False
 
 gpu_user_data = f"""#!/bin/bash
 export PATH=$PATH:/home/ec2-user/anaconda3/bin

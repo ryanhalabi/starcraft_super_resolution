@@ -57,8 +57,9 @@ class Image:
 def download_images(urls):
 
     for url in urls:
-        unit = re.search(r"[/\d]([A-Za-z_]*).png", url).group(1)
-        file_name = str(env.units / f"{unit}.png")
+        # unit = re.search(r"[/\d]([A-Za-z_]*).png", url).group(1)
+        unit = re.search(r"[/\d]([\w]*).jpg", url).group(1)
+       file_name = str(env.units / f"{unit}.png")
         with open(file_name, "wb+") as f:
             f.write(requests.get(url).content)
 
