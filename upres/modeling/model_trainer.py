@@ -24,6 +24,7 @@ class ModelTrainer:
     def __init__(self, sr_model):
         self.sr_model = sr_model
         self.set_upscale_model()
+        self.validation_split = 0.25
 
         # The # of points we truncate off the edges of the NN output.
         self.padding = int((self.sr_model.max_kernel_size - 1) / 2)
@@ -57,7 +58,13 @@ class ModelTrainer:
         callbacks = [tensorboard_callback, custom_callback] if log else []
 
         self.sr_model.model.fit(
-            self.X, self.Y, epochs=epochs, batch_size=batch_size, verbose=1, callbacks=callbacks,
+            self.X,
+            self.Y,
+            epochs=epochs,
+            batch_size=batch_size,
+            validation_split=self.validation_split,
+            verbose=1,
+            callbacks=callbacks,
         )
 
     def log_initial_images(self):
@@ -121,7 +128,6 @@ class CustomCallback(tf.keras.callbacks.Callback):
             env.sync_with_s3(env.data_path)
 
 
-
 def log_images(images, model_name, images_path, epoch, start_epoch=0):
     file_writer = tf.summary.create_file_writer(
         str(images_path), filename_suffix=f"_{start_epoch + epoch}.v2"
@@ -131,4 +137,3 @@ def log_images(images, model_name, images_path, epoch, start_epoch=0):
         tf.summary.image(
             model_name, images / 255, max_outputs=25, step=start_epoch + epoch,
         )
-

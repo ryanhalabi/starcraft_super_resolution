@@ -31,10 +31,17 @@ class Environment(object):
         self.aws_key_name = os.getenv("key_name")
         self.aws_vpc_id = os.getenv("vpc_id")
 
-
     def sync_with_s3(self, root_path):
-        sync_bash_command = ["aws", "s3", "sync", self.data_path, self.aws_s3_bucket_uri, "--delete"]
+        sync_bash_command = [
+            "aws",
+            "s3",
+            "sync",
+            self.data_path,
+            self.aws_s3_bucket_uri,
+            "--delete",
+        ]
 
         subprocess.call(sync_bash_command)
+
 
 env = Environment()

@@ -9,16 +9,19 @@ training, and host a Tensorboard dashboard.
 
 # instance_type = "t2.micro"
 # instance_type = "g4dn.xlarge"
-instance_type = "g4dn.4xlarge"
-# instance_type = "p3.2xlarge"
+# instance_type = "g4dn.4xlarge"
+instance_type = "p2.xlarge"
 
 # dl amazon linux ami
 ami_id = "ami-07bff1635c6a912a7"
 
 
 # MODEL SETTINGS - Change these to configure your model.
-name = "color_frames"
-dataset = "frames"
+# units "128,11 256,1 19"
+# frames "64,9 128,1 17"
+
+name = "color_units"
+dataset = "units"
 layers = "64,9 128,1 17"
 scaling = 5
 epochs = 20000000000
