@@ -9,8 +9,8 @@ training, and host a Tensorboard dashboard.
 
 # instance_type = "t2.micro"
 #instance_type = "g4dn.xlarge"
-# instance_type = "g4dn.4xlarge"
-instance_type = "p2.xlarge"
+instance_type = "g4dn.4xlarge"
+# instance_type = "p2.xlarge"
 
 # deep learning amazon linux ami
 ami_id = "ami-05e3c3618bcdf8a38"
@@ -48,7 +48,7 @@ export s3_bucket_name={env.aws_s3_bucket_name}
 aws s3 sync {env.aws_s3_bucket_uri} /starcraft_super_resolution/upres/data
 
 screen -S tensorboard -d -m bash -c "/home/ec2-user/anaconda3/envs/tensorflow2_p36/bin/tensorboard \
---logdir=/starcraft_super_resolution/upres --port=8080  --bind_all \
+--logdir=/starcraft_super_resolution/upres/data/output --port=8080  --bind_all \
 --max_reload_threads 1 --samples_per_plugin='images=0,scalars=0'"
 
 screen -S training -d -m bash -c '\
