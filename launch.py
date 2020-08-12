@@ -27,7 +27,7 @@ layers = "128,11 256,1 19"
 scaling = 5
 epochs = 20000000000
 batch_size = 32
-epochs_per_save = 5000
+epochs_per_save = 50
 overwrite = False
 
 gpu_user_data = f"""#!/bin/bash
