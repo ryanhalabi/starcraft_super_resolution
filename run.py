@@ -21,8 +21,6 @@ def download_images(units_or_frames, greyscale, scaling):
             download_video_frames()
 
     image_path = env.units if units_or_frames == "units" else env.frames
-
-    # this so we don't see sequential images in tensorboard
     image_files = [x for x in os.listdir(image_path) if x != ".gitignore"]
     images = [
         Image(image_path / x, greyscale=greyscale, scaling=scaling) for x in image_files
@@ -78,7 +76,7 @@ def make_parser():
         "--batch_size", help="Training batch size", default=32, type=int
     )
     parser.add_argument(
-        "--epochs_per",
+        "--epochs_per_save",
         help="How many epochs we train on before output images and save model",
         default=1,
         type=int,
@@ -108,7 +106,7 @@ if __name__ == "__main__":
     scaling = arguments.scaling
     epochs = arguments.epochs
     batch_size = arguments.batch_size
-    epochs_per = arguments.epochs_per
+    epochs_per_save = arguments.epochs_per_save
     overwrite = False if arguments.overwrite == "False" else True
 
     channels = 1 if greyscale else 3
@@ -130,4 +128,4 @@ if __name__ == "__main__":
     )
 
     mt = ModelTrainer(sr_model)
-    mt.train(images, epochs=epochs, batch_size=batch_size, epochs_per=epochs_per)
+    mt.train(images, epochs=epochs, batch_size=batch_size, epochs_per_save=epochs_per_save)

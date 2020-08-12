@@ -3,7 +3,7 @@ numpy==1.18.1
 boto3==1.12.11
 pytube==9.6.0
 pytube3==9.6.4
-tensorflow
+tensorflow==2.3.0
 requests==2.21.0
-opencv_python
+opencv-python==4.2.0.32
 python-dotenv==0.12.0
