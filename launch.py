@@ -9,8 +9,9 @@ training, and host a Tensorboard dashboard.
 
 # instance_type = "t2.micro"
 #instance_type = "g4dn.xlarge"
-instance_type = "g4dn.4xlarge"
-# instance_type = "p2.xlarge"
+# instance_type = "g4dn.4xlarge"
+instance_type = "p2.xlarge"
+# instance_type = "p3.2xlarge"
 
 # deep learning amazon linux ami
 ami_id = "ami-05e3c3618bcdf8a38"
@@ -26,7 +27,7 @@ layers = "128,11 256,1 19"
 scaling = 5
 epochs = 20000000000
 batch_size = 32
-epochs_per_save = 2
+epochs_per_save = 5000
 overwrite = False
 
 gpu_user_data = f"""#!/bin/bash
@@ -49,7 +50,7 @@ aws s3 sync {env.aws_s3_bucket_uri} /starcraft_super_resolution/upres/data
 
 screen -S tensorboard -d -m bash -c "/home/ec2-user/anaconda3/envs/tensorflow2_p36/bin/tensorboard \
 --logdir=/starcraft_super_resolution/upres/data/output --port=8080  --bind_all \
---max_reload_threads 1 --samples_per_plugin='images=0,scalars=0'"
+--max_reload_threads 1 --samples_per_plugin='images=200'"
 
 screen -S training -d -m bash -c '\
 export PATH=$PATH:/home/ec2-user/anaconda3/bin; \
