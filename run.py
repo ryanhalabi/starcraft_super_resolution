@@ -22,6 +22,7 @@ def download_images(units_or_frames, greyscale, scaling):
 
     image_path = env.units if units_or_frames == "units" else env.frames
     image_files = [x for x in os.listdir(image_path) if x != ".gitignore"]
+    image_files = sorted(image_files)
     images = [
         Image(image_path / x, greyscale=greyscale, scaling=scaling) for x in image_files
     ]
@@ -114,8 +115,11 @@ if __name__ == "__main__":
     keras_layers = build_keras_layers(layers, channels)
 
     # get data
-    images = download_images(dataset, greyscale, scaling)
+    images = download_images(dataset, greyscale, scaling)[0:1]
+
     image_shape = tuple(images[0].get_array(1 / scaling).shape)
+
+    name = f"{name}_{dataset}_{layers}"
 
     # build or load sr model
     sr_model = SRModel(
