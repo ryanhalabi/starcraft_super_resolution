@@ -24,7 +24,7 @@ class ModelTrainer:
     def __init__(self, sr_model):
         self.sr_model = sr_model
         self.set_upscale_model()
-        self.validation_split = 0.25
+        self.validation_split = 0
 
         # The # of points we truncate off the edges of the NN output.
         self.padding = int((self.sr_model.max_kernel_size - 1) / 2)
