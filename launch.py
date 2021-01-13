@@ -8,13 +8,13 @@ training, and host a Tensorboard dashboard.
 """
 
 # instance_type = "t2.micro"
-#instance_type = "g4dn.xlarge"
+instance_type = "g4dn.xlarge"
 # instance_type = "g4dn.4xlarge"
 # instance_type = "p2.xlarge"
-instance_type = "p3.2xlarge"
+# instance_type = "p3.2xlarge"
 
 # deep learning amazon linux ami
-ami_id = "ami-05e3c3618bcdf8a38"
+ami_id = "ami-01a495658aa5f7930"
 
 
 # MODEL SETTINGS - Change these to configure your model.
@@ -28,9 +28,10 @@ scaling = 3
 epochs = 20000000000
 batch_size = 32
 epochs_per_save = 100
-overwrite = False
+overwrite = True
 
-gpu_user_data = f"""#!/bin/bash
+gpu_user_data = f"""
+#!/bin/bash
 export PATH=$PATH:/home/ec2-user/anaconda3/bin
 source activate tensorflow2_p36
 

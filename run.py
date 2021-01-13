@@ -8,7 +8,8 @@ from upres.modeling.model_trainer import ModelTrainer
 from upres.modeling.sr_model import SRModel
 from upres.utils.environment import env
 from upres.utils.image import Image, download_unit_images
-from upres.utils.screenshot_generator import download_video_frames
+
+# from upres.utils.screenshot_generator import download_video_frames
 
 
 def download_images(units_or_frames, greyscale, scaling):
@@ -16,9 +17,9 @@ def download_images(units_or_frames, greyscale, scaling):
         if len(os.listdir(env.units)) == 1:
             download_unit_images()
 
-    elif units_or_frames == "frames":
-        if len(os.listdir(env.frames)) == 1:
-            download_video_frames()
+    # elif units_or_frames == "frames":
+    #     if len(os.listdir(env.frames)) == 1:
+    #         download_video_frames()
 
     image_path = env.units if units_or_frames == "units" else env.frames
     image_files = [x for x in os.listdir(image_path) if x != ".gitignore"]
@@ -132,4 +133,6 @@ if __name__ == "__main__":
     )
 
     mt = ModelTrainer(sr_model)
-    mt.train(images, epochs=epochs, batch_size=batch_size, epochs_per_save=epochs_per_save)
+    mt.train(
+        images, epochs=epochs, batch_size=batch_size, epochs_per_save=epochs_per_save
+    )
