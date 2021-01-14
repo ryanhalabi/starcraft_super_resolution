@@ -116,7 +116,7 @@ if __name__ == "__main__":
     keras_layers = build_keras_layers(layers, channels)
 
     # get data
-    images = download_images(dataset, greyscale, scaling)[0:1]
+    images = download_images(dataset, greyscale, scaling)
 
     image_shape = tuple(images[0].get_array(1 / scaling).shape)
 
