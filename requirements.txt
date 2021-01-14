@@ -1,9 +1,9 @@
 pandas
-numpy==1.18.1
-boto3==1.12.11
+numpy
+boto3
 # pytube==9.6.0
 # pytube3==9.6.4
 tensorflow>=2.4.0
-requests==2.21.0
-opencv-python==4.2.0.32
-python-dotenv==0.12.0
+requests
+opencv-python
+python-dotenv
