@@ -21,6 +21,11 @@ class Image:
         return re.search(r"/([\w]*).png", str(self.path)).group(1)
 
     def get_array(self, scale=1):
+        """
+        Loads image and returns as a resized array.
+
+        ex: get_array(scale=2) would return an array 2x the size of the original.
+        """
         array = cv2.imread(str(self.path), self.read_type)
 
         # resize original image so it can be be scaled without fractions

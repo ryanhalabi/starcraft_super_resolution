@@ -30,13 +30,10 @@ class ModelTrainer:
         self.padding = int((self.sr_model.max_kernel_size - 1) / 2)
 
     def train(self, images, epochs, batch_size, epochs_per_save, log=True):
-        train_images = images
 
-        self.X = np.array(
-            [x.get_array(1 / self.sr_model.scaling) for x in train_images]
-        )
+        self.X = np.array([x.get_array(1 / self.sr_model.scaling) for x in images])
 
-        self.Y = np.array([x.get_array() for x in train_images])
+        self.Y = np.array([x.get_array() for x in images])
         if self.padding != 0:
             self.Y = self.Y[
                 :, self.padding : -self.padding, self.padding : -self.padding, :
@@ -135,5 +132,8 @@ def log_images(images, model_name, images_path, epoch, start_epoch=0):
 
     with file_writer.as_default():
         tf.summary.image(
-            model_name, images / 255, max_outputs=25, step=start_epoch + epoch,
+            model_name,
+            images / 255,
+            max_outputs=25,
+            step=start_epoch + epoch,
         )
