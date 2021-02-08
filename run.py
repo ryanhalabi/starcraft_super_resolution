@@ -84,6 +84,7 @@ def make_parser():
         type=int,
     )
     parser.add_argument("--greyscale", help="greyscale?", default="False")
+    parser.add_argument("--s3_sync", help="sync with s3", default="True")
     parser.add_argument(
         "--overwrite", help="Whether to overwrite existing model data", default="False"
     )
@@ -91,10 +92,8 @@ def make_parser():
     return parser
 
 
-# python3 run.py --h
-
-# python3 run.py --name color_units --dataset units --layers 69,9 128,1 5 \
-# --scaling 5 --epochs 1 --batches 2 --overwrite True
+# python3 run.py --name color_units --dataset units --layers 69,9 128,1 5 --scaling 5 --epochs 5 --overwrite True --s3_sync False
+# tensorboard --logdir=/Users/ryan/projects/starcraft_super_resolution/upres/data/output --port=8080  --bind_all --max_reload_threads 1 --samples_per_plugin='images=200'
 
 if __name__ == "__main__":
 
@@ -109,6 +108,7 @@ if __name__ == "__main__":
     epochs = arguments.epochs
     batch_size = arguments.batch_size
     epochs_per_save = arguments.epochs_per_save
+    s3_sync = False if arguments.s3_sync == "False" else True
     overwrite = False if arguments.overwrite == "False" else True
 
     channels = 1 if greyscale else 3
@@ -119,7 +119,6 @@ if __name__ == "__main__":
     images = download_images(dataset, greyscale, scaling)
 
     image_shape = tuple(images[0].get_array(1 / scaling).shape)
-
     name = f"{name}_{dataset}_{layers}"
 
     # build or load sr model
@@ -134,5 +133,9 @@ if __name__ == "__main__":
 
     mt = ModelTrainer(sr_model)
     mt.train(
-        images, epochs=epochs, batch_size=batch_size, epochs_per_save=epochs_per_save
+        images,
+        epochs=epochs,
+        batch_size=batch_size,
+        epochs_per_save=epochs_per_save,
+        s3_sync=s3_sync,
     )
