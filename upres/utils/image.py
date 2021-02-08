@@ -46,9 +46,10 @@ class Image:
         )
 
         # cv2 reads in array as BGR, tensorboard shows as RGB
-        x = np.copy(resized_array)
-        resized_array[:, :, 0] = x[:, :, 2]
-        resized_array[:, :, 2] = x[:, :, 0]
+        if not self.greyscale:
+            x = np.copy(resized_array)
+            resized_array[:, :, 0] = x[:, :, 2]
+            resized_array[:, :, 2] = x[:, :, 0]
 
         # cv2.imshow('image',array)
         # cv2.waitKey(0)
