@@ -29,7 +29,7 @@ class ModelTrainer:
         # The # of points we truncate off the edges of the NN output.
         self.padding = int((self.sr_model.max_kernel_size - 1) / 2)
 
-    def train(self, images, epochs, batch_size, epochs_per_save, log=True):
+    def train(self, images, epochs, batch_size, epochs_per_save, s3_sync=True):
 
         self.X = np.array([x.get_array(1 / self.sr_model.scaling) for x in images])
 
@@ -50,9 +50,11 @@ class ModelTrainer:
         tensorboard_callback = TensorBoard(
             log_dir=str(epoch_log_path), histogram_freq=1
         )
-        custom_callback = CustomCallback(self.X, self.sr_model, epochs_per_save)
+        custom_callback = CustomCallback(
+            self.X, self.sr_model, epochs_per_save, s3_sync
+        )
 
-        callbacks = [tensorboard_callback, custom_callback] if log else []
+        callbacks = [tensorboard_callback, custom_callback]
 
         self.sr_model.model.fit(
             self.X,
@@ -96,7 +98,7 @@ class CustomCallback(tf.keras.callbacks.Callback):
     Custom callback that saves the model and outputs images every 'epochs_per_save' epochs.
     """
 
-    def __init__(self, X, sr_model, epochs_per_save):
+    def __init__(self, X, sr_model, epochs_per_save, s3_sync):
         super().__init__()
         self.X = X
         self.model_path = sr_model.model_path
@@ -105,6 +107,7 @@ class CustomCallback(tf.keras.callbacks.Callback):
 
         self.start_epoch = sr_model.start_epoch
         self.epochs_per_save = epochs_per_save
+        self.s3_sync = s3_sync
 
     def on_epoch_begin(self, epoch, logs=None):
 
@@ -122,7 +125,8 @@ class CustomCallback(tf.keras.callbacks.Callback):
                 )
             )
 
-            env.sync_with_s3(env.data_path)
+            if self.s3_sync:
+                env.sync_with_s3(env.data_path)
 
 
 def log_images(images, model_name, images_path, epoch, start_epoch=0):

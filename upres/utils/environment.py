@@ -32,6 +32,9 @@ class Environment(object):
         self.aws_vpc_id = os.getenv("vpc_id")
 
     def sync_with_s3(self, root_path):
+        """
+        Runs bash command to sync local files with s3 storage.
+        """
         sync_bash_command = [
             "aws",
             "s3",
