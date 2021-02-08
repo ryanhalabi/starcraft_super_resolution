@@ -9,8 +9,7 @@ import numpy as np
 import requests
 import tensorflow as tf
 from tensorflow import keras
-from tensorflow.keras.callbacks import TensorBoard, Callback
-
+from tensorflow.keras.callbacks import Callback, TensorBoard
 from upres.modeling.sr_model import SRModel
 from upres.utils.environment import env
 from upres.utils.image import Image
@@ -139,3 +138,11 @@ def log_images(images, model_name, images_path, epoch, start_epoch=0):
             max_outputs=25,
             step=start_epoch + epoch,
         )
+
+    for i in range(images.shape[0]):
+        # open cv reads as BGR
+        image = np.array(images[i, :, :, :])
+        image[:, :, 0] = images[i, :, :, 2]
+        image[:, :, 2] = images[i, :, :, 0]
+
+        cv2.imwrite(f"{images_path}/static/{i}_{start_epoch + epoch}.jpg", image)

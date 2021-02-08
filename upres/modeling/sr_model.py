@@ -81,6 +81,7 @@ class SRModel:
                 os.mkdir(self.model_path / "models")
                 os.mkdir(self.model_path / "logs")
                 os.mkdir(self.model_path / "images")
+                os.mkdir(self.model_path / "images" / "static")
 
         self.log_path = self.model_path / "logs"
         self.images_path = self.model_path / "images"
@@ -213,4 +214,3 @@ class SRModel:
         self.rf_stride = int(receptive_field.stride[0])
         self.rf_size = int(receptive_field.size[0])
         self.rf_padding = int(receptive_field.padding[0])
-
