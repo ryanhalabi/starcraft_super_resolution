@@ -8,9 +8,9 @@ training, and host a Tensorboard dashboard.
 """
 
 # instance_type = "t2.micro"
-instance_type = "g4dn.xlarge"
+# instance_type = "g4dn.xlarge"
 # instance_type = "g4dn.4xlarge"
-# instance_type = "p2.xlarge"
+instance_type = "p2.xlarge"
 # instance_type = "p3.2xlarge"
 
 # deep learning amazon linux ami
@@ -23,12 +23,14 @@ ami_id = "ami-01a495658aa5f7930"
 
 name = "a"
 dataset = "units"
-layers = "512,15 1024,1 19"
+layers = "128,9 256,1 19"
 scaling = 3
 epochs = 20000000000
 batch_size = 32
 epochs_per_save = 100
+greyscale = False
 overwrite = True
+s3_sync = True
 
 gpu_user_data = f"""
 #!/bin/bash
@@ -38,12 +40,12 @@ source activate tensorflow2_p36
 git clone https://github.com/ryanhalabi/starcraft_super_resolution
 git -C ./starcraft_super_resolution/ pull
 
-git clone https://github.com/google-research/receptive_field
-python3 -m pip install ./receptive_field/
-
 python3 -m pip install --upgrade pip
 python3 -m pip install -r starcraft_super_resolution/requirements.txt
-python3 -m pip install -e starcraft_super_resolution/ --user
+python3 -m pip install -e starcraft_super_resolution/
+
+git clone https://github.com/google-research/receptive_field
+python3 -m pip install ./receptive_field/
 
 export AWS_ACCESS_KEY_ID={env.aws_access_key_id}
 export AWS_SECRET_ACCESS_KEY={env.aws_secret_access_key}
@@ -60,7 +62,8 @@ screen -S training -d -m bash -c '\
 export PATH=$PATH:/home/ec2-user/anaconda3/bin; \
 source activate tensorflow2_p36; \
 python3 /starcraft_super_resolution/run.py --name {name} --dataset {dataset} --layers {layers} \
---scaling {scaling} --epochs {epochs} --batch_size {batch_size} --epochs_per_save {epochs_per_save} --overwrite {overwrite}\
+--scaling {scaling} --epochs {epochs} --batch_size {batch_size} --epochs_per_save {epochs_per_save} \
+--greyscale {greyscale} --overwrite {overwrite} --s3_sync {s3_sync}\
 '
 """
 

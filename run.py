@@ -54,7 +54,7 @@ def make_parser():
         type=int,
     )
     parser.add_argument("--greyscale", help="greyscale?", default="False")
-    parser.add_argument("--s3_sync", help="sync with s3", default="True")
+    parser.add_argument("--s3_sync", help="sync with s3", default="False")
     parser.add_argument(
         "--overwrite", help="Whether to overwrite existing model data", default="False"
     )
