@@ -54,7 +54,7 @@ overwrite:  Whether to overwrite previous model data.
 
 - Set your AWS variables in a `.env` file in the base folder. See `.env_sample`.
 - Configure your `boto` access keys. https://aws.amazon.com/developers/getting-started/python/.
-- Edit the `Model Settings` variables in `launch.py`.
+- Edit the `Model Settings` variables in `run_aws.py`.
 - `python3 starcraft_super_resolution/launch.py`.
 - Output gives SSH command & link to hosted tensorboard instance.
 
