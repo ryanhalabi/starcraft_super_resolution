@@ -3,9 +3,10 @@ import re
 import shutil
 
 import numpy as np
+import tensorflow as tf
 from tensorflow import keras
-
 from upres.utils.environment import env
+import receptive_field as rf
 
 
 class SRModel:
@@ -16,7 +17,13 @@ class SRModel:
     """
 
     def __init__(
-        self, name, input_shape, layers, scaling=5, channels=1, overwrite=False,
+        self,
+        name,
+        input_shape,
+        layers,
+        scaling=5,
+        channels=1,
+        overwrite=False,
     ):
         """
         Parameters
@@ -37,9 +44,6 @@ class SRModel:
         """
 
         assert scaling % 2 != 0, "Scaling factor must be odd"
-        assert all(
-            [x.kernel_size[0] % 2 != 0 for x in layers]
-        ), "All kernels must be odd sized"
 
         self.name = name
         self.model_path = env.output / self.name
@@ -49,7 +53,6 @@ class SRModel:
         self.input_shape = input_shape
         self.layers = layers
 
-        self.max_kernel_size = max([x.kernel_size[0] for x in self.layers])
         self.set_optimizer()
 
         if overwrite and os.path.isdir(self.model_path):
@@ -93,8 +96,11 @@ class SRModel:
 
     def make_model(self):
 
+        self.calculate_receptive_field()
+
         inputs = keras.layers.Input(
-            shape=(self.input_shape[0], self.input_shape[1], self.channels)
+            shape=(self.input_shape[0], self.input_shape[1], self.channels),
+            name="input",
         )
 
         # upscaler
@@ -102,16 +108,21 @@ class SRModel:
             self.channels,
             (self.conv_size, self.conv_size),
             strides=(self.scaling, self.scaling),
+            padding="same",
+            name="upscaler",
         )(inputs)
 
-        # trainable paramters
-        last_layer = self.apply_layers(upscaler)
+        # trainable parameters
+        keras_layers = self.build_keras_layers()
+        last_layer = self.apply_layers(keras_layers, upscaler)
 
         # combine upscale + trainable parameters, we predict residual
-        add_layer = keras.layers.add([last_layer, upscaler])
+        add_layer = keras.layers.add(
+            [last_layer, upscaler], name="residual_plus_upscaler"
+        )
 
-        depad_layer = self.make_depad_layer()
-        predictions = depad_layer(add_layer)
+        cropping_layer = self.make_cropping_layer()
+        predictions = cropping_layer(add_layer)
 
         # finalize model
         model = keras.Model(inputs=inputs, outputs=predictions)
@@ -121,44 +132,85 @@ class SRModel:
 
         return model
 
-    def apply_layers(self, input):
+    def apply_layers(self, keras_layers, input):
 
-        first_layer = self.layers[0]
+        first_layer = keras_layers[0]
         previous_layer = first_layer(input)
 
-        for layer in self.layers[1:]:
+        for layer in keras_layers[1:]:
             previous_layer = layer(previous_layer)
 
         return previous_layer
 
-    def make_depad_layer(self):
+    def make_cropping_layer(self):
         """
-        Removes ghost points from conv2d and points that are influenced by ghost points from convolutions.
-
-        self.conv_size - self.scaling + 1: removes the ghost points from conv2d 
-        self.max_kernel_size - 1: removes any points that are influenced by boundary bad points from conv2d
+        Creates layer that crops out points whose receptive field falls out of bounds.
         """
-        depad_filter_size = (self.conv_size - self.scaling + 1) + (
-            self.max_kernel_size - 1
-        )
-        depad_kernel = np.zeros(
-            [depad_filter_size, depad_filter_size, self.channels, self.channels]
-        )
-        center = int(depad_kernel.shape[0] / 2)
-        for i in range(self.channels):
-            depad_kernel[center, center, i, i] = 1
 
-        depad_bias = np.zeros([self.channels])
+        # the points to crop out from the transpose convolutional layer
+        # conv_transpose_crop = (self.conv_size - self.scaling) / 2
 
-        depad_layer = keras.layers.Conv2D(
-            self.channels,
-            (depad_filter_size, depad_filter_size),
-            strides=(1, 1),
-            weights=[depad_kernel, depad_bias],
-            trainable=False,
-        )
+        # the points to crop out from since they absorb ghost convolutional points
+        cropping_layer = keras.layers.Cropping2D(cropping=self.rf_padding)
 
-        return depad_layer
+        return cropping_layer
 
     def set_optimizer(self):
         self.optimizer = keras.optimizers.Adam()
+
+    def build_keras_layers(self):
+        # build middle layers
+        keras_layers = []
+        for i, layer in enumerate(self.layers[:-1]):
+            num_filters, conv_size = [int(x) for x in layer.split(",")]
+            keras_layer = keras.layers.Conv2D(
+                num_filters,
+                (conv_size, conv_size),
+                strides=(1, 1),
+                padding="same",
+                activation="relu",
+                name=f"l_{i}",
+            )
+
+            keras_layers.append(keras_layer)
+
+        # make last layer have appropriate channel size
+        conv_size = int(self.layers[-1])
+        keras_layer = keras.layers.Conv2D(
+            self.channels,
+            (conv_size, conv_size),
+            strides=(1, 1),
+            padding="same",
+            activation="relu",
+            name=f"l_{len(self.layers)}",
+        )
+
+        keras_layers.append(keras_layer)
+
+        assert all(
+            [x.kernel_size[0] % 2 != 0 for x in keras_layers]
+        ), "All kernels must be odd sized"
+
+        return keras_layers
+
+    def calculate_receptive_field(self):
+        g = tf.Graph()
+        with g.as_default():
+
+            inputs = keras.layers.Input(
+                shape=(1000, 1000, self.channels),
+                name="input",
+            )
+
+            keras_layers = self.build_keras_layers()
+            last_layer = self.apply_layers(keras_layers, inputs)
+
+            model = keras.Model(inputs=inputs, outputs=last_layer)
+
+        receptive_field = rf.compute_receptive_field_from_graph_def(
+            g, "input", model.outputs[0].op.name
+        )
+        self.rf_stride = int(receptive_field.stride[0])
+        self.rf_size = int(receptive_field.size[0])
+        self.rf_padding = int(receptive_field.padding[0])
+

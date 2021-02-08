@@ -31,36 +31,6 @@ def download_images(units_or_frames, greyscale, scaling):
     return images
 
 
-def build_keras_layers(layers, channels):
-    # build middle layers
-    keras_layers = []
-    for layer in layers[:-1]:
-        num_filters, conv_size = [int(x) for x in layer.split(",")]
-        keras_layer = keras.layers.Conv2D(
-            num_filters,
-            (conv_size, conv_size),
-            strides=(1, 1),
-            padding="same",
-            activation="relu",
-        )
-
-        keras_layers.append(keras_layer)
-
-    # make last layer have appropriate channel size
-    conv_size = int(layers[-1])
-    keras_layer = keras.layers.Conv2D(
-        channels,
-        (conv_size, conv_size),
-        strides=(1, 1),
-        padding="same",
-        activation="relu",
-    )
-
-    keras_layers.append(keras_layer)
-
-    return keras_layers
-
-
 def make_parser():
     parser = argparse.ArgumentParser(
         description="Construct and train a super resolution network"
@@ -113,8 +83,6 @@ if __name__ == "__main__":
 
     channels = 1 if greyscale else 3
 
-    keras_layers = build_keras_layers(layers, channels)
-
     # get data
     images = download_images(dataset, greyscale, scaling)
 
@@ -125,7 +93,7 @@ if __name__ == "__main__":
     sr_model = SRModel(
         name,
         image_shape,
-        keras_layers,
+        layers,
         channels=channels,
         scaling=scaling,
         overwrite=overwrite,

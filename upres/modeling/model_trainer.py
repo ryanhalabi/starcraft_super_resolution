@@ -26,17 +26,17 @@ class ModelTrainer:
         self.set_upscale_model()
         self.validation_split = 0
 
-        # The # of points we truncate off the edges of the NN output.
-        self.padding = int((self.sr_model.max_kernel_size - 1) / 2)
-
     def train(self, images, epochs, batch_size, epochs_per_save, s3_sync=True):
 
         self.X = np.array([x.get_array(1 / self.sr_model.scaling) for x in images])
 
         self.Y = np.array([x.get_array() for x in images])
-        if self.padding != 0:
+        if self.sr_model.rf_padding != 0:
             self.Y = self.Y[
-                :, self.padding : -self.padding, self.padding : -self.padding, :
+                :,
+                self.sr_model.rf_padding : -self.sr_model.rf_padding,
+                self.sr_model.rf_padding : -self.sr_model.rf_padding,
+                :,
             ]
 
         if self.sr_model.start_epoch == 0:
@@ -68,10 +68,6 @@ class ModelTrainer:
 
     def log_initial_images(self):
         low_res = self.up_model.predict(self.X)
-        if self.padding != 0:
-            low_res = low_res[
-                :, self.padding : -self.padding, self.padding : -self.padding, :
-            ]
         # low_res = np.array([ cv2.resize(self.X[i,:,:,:], (self.Y.shape[2], self.Y.shape[1])) for i in range(self.X.shape[0])])
 
         log_images(self.Y, self.sr_model.name, self.sr_model.images_path, -2)
@@ -89,6 +85,8 @@ class ModelTrainer:
                 input_shape=(None, None, self.sr_model.channels),
             )
         )
+
+        up_model.add(keras.layers.Cropping2D(cropping=self.sr_model.rf_padding))
 
         self.up_model = up_model
 
