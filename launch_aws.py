@@ -38,6 +38,9 @@ source activate tensorflow2_p36
 git clone https://github.com/ryanhalabi/starcraft_super_resolution
 git -C ./starcraft_super_resolution/ pull
 
+git clone https://github.com/google-research/receptive_field
+python3 -m pip install ./receptive_field/
+
 python3 -m pip install --upgrade pip
 python3 -m pip install -r starcraft_super_resolution/requirements.txt
 python3 -m pip install -e starcraft_super_resolution/ --user
