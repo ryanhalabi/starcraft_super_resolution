@@ -4,8 +4,22 @@ Used to generate gifs from static image outputs
 
 from PIL import Image, ImageDraw
 import os
+from pathlib import Path
 
-static_image_folder = "/Users/ryan/projects/starcraft_super_resolution/upres/data/output/a_units_['128,9', '256,1', '19']/images/static"
+model_folder = "a_non_relu_units_['128,9', '256,1', '19']"
+# model_folder = "a_units_['128,9', '256,1', '19']"
+static_image_folder = (
+    Path("/Users/ryan/projects/starcraft_super_resolution/upres/data/output")
+    / model_folder
+    / Path("images/static")
+)
+output_path = (
+    Path("/Users/ryan/projects/starcraft_super_resolution/presentation/gifs")
+    / model_folder
+)
+
+if not os.path.exists(output_path):
+    os.mkdir(output_path)
 
 images = [x for x in os.listdir(static_image_folder) if ".gif" not in x]
 image_names = {x.split("_")[0] for x in images}
@@ -35,15 +49,14 @@ for image_name in image_names:
         draw = ImageDraw.Draw(new_im)
 
         draw.text((width / 2, 10), "bilinear interpolation")
-        draw.text((3 * width / 2, 10), f"target")
-
+        draw.text((3 * width / 2, 10), "target")
         draw.text((width / 2, height), f"epoch={i*100}")
-        draw.text((3 * width / 2, height), "final epoch")
+        draw.text((3 * width / 2, height), f"final epoch={ max(named_images.keys())}")
 
         new_imgs.append(new_im)
 
     new_imgs[0].save(
-        fp=f"{static_image_folder}/{fp_out}",
+        fp=f"{output_path}/{fp_out}",
         format="GIF",
         append_images=new_imgs[1:],
         save_all=True,

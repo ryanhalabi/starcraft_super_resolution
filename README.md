@@ -3,7 +3,7 @@
 Project to upscale Starcraft images using Super Resolution techniques.
 
 ### Results
-In each image we see the results of applying a baseline bilinear interpolation, the trained super resolution work at different epochs, the final epoch result, and the ground truth high resolution image.  The model here was created using a `layers` param of `"128,9 256,1 19"`,
+In each image we see the results of applying baseline bilinear interpolation, the trained super resolution work at different epochs, the networks final result at the final epoch, and the ground truth high resolution image.  The input to all these models was the ground truth image scaled down 3x.  The model here was created using a `layers` param of `"128,9 256,1 19"`.
 
 ![0](presentation/gifs/0.gif)
 ![1](presentation/gifs/1.gif)
