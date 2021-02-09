@@ -1,3 +1,7 @@
+"""
+Used to generate gifs from static image outputs
+"""
+
 from PIL import Image, ImageDraw
 import os
 

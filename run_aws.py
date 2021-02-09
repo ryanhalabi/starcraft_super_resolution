@@ -21,7 +21,7 @@ ami_id = "ami-01a495658aa5f7930"
 # units "128,11 256,1 19"
 # frames "64,9 128,1 17"
 
-name = "a"
+name = "a_non_relu"
 dataset = "units"
 layers = "128,9 256,1 19"
 scaling = 3

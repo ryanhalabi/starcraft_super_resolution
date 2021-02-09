@@ -182,7 +182,6 @@ class SRModel:
             (conv_size, conv_size),
             strides=(1, 1),
             padding="same",
-            activation="relu",
             name=f"l_{len(self.layers)}",
         )
 
