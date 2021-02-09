@@ -62,7 +62,7 @@ def make_parser():
     return parser
 
 
-# python3 run.py --name color_units --dataset units --layers 69,9 128,1 5 --scaling 5 --epochs 5 --overwrite True --s3_sync False
+# python3 run.py --name local_test --dataset units --layers 20,3 40,1 20 --scaling 3 --epochs 5 --overwrite True --s3_sync False
 # tensorboard --logdir=/Users/ryan/projects/starcraft_super_resolution/upres/data/output --port=8080  --bind_all --max_reload_threads 1 --samples_per_plugin='images=200'
 
 if __name__ == "__main__":

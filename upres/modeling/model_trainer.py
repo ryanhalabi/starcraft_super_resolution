@@ -74,20 +74,29 @@ class ModelTrainer:
 
     def set_upscale_model(self):
         """
-        This sets up a simple upscaling CNN to compare against.
+        This sets up a baseline upscaler to compare visual results against.
         """
-        up_model = keras.Sequential()
-        up_model.add(
-            keras.layers.UpSampling2D(
-                size=(self.sr_model.scaling, self.sr_model.scaling),
-                interpolation="bilinear",
-                input_shape=(None, None, self.sr_model.channels),
-            )
+        inputs = keras.layers.Input(
+            shape=(
+                self.sr_model.input_shape[0],
+                self.sr_model.input_shape[1],
+                self.sr_model.channels,
+            ),
+            name="input",
         )
 
-        up_model.add(keras.layers.Cropping2D(cropping=self.sr_model.rf_padding))
+        bilin_interp = keras.layers.UpSampling2D(
+            size=(self.sr_model.scaling, self.sr_model.scaling),
+            interpolation="bilinear",
+        )(inputs)
 
-        self.up_model = up_model
+        rf_cropper = keras.layers.Cropping2D(cropping=self.sr_model.rf_padding)(
+            bilin_interp
+        )
+
+        upscaler = keras.Model(inputs=inputs, outputs=rf_cropper)
+
+        self.up_model = upscaler
 
 
 class CustomCallback(tf.keras.callbacks.Callback):
@@ -142,7 +151,9 @@ def log_images(images, model_name, images_path, epoch, start_epoch=0):
     for i in range(images.shape[0]):
         # open cv reads as BGR
         image = np.array(images[i, :, :, :])
-        image[:, :, 0] = images[i, :, :, 2]
-        image[:, :, 2] = images[i, :, :, 0]
+
+        if image.shape[2] == 3:
+            image[:, :, 0] = images[i, :, :, 2]
+            image[:, :, 2] = images[i, :, :, 0]
 
         cv2.imwrite(f"{images_path}/static/{i}_{start_epoch + epoch}.jpg", image)
