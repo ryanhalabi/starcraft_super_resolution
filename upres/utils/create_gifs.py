@@ -7,7 +7,7 @@ import os
 
 static_image_folder = "/Users/ryan/projects/starcraft_super_resolution/upres/data/output/a_units_['128,9', '256,1', '19']/images/static"
 
-images = os.listdir(static_image_folder)
+images = [x for x in os.listdir(static_image_folder) if ".gif" not in x]
 image_names = {x.split("_")[0] for x in images}
 
 for image_name in image_names:
@@ -16,26 +16,29 @@ for image_name in image_names:
     }
     ordered_images = [named_images[x] for x in sorted(named_images.keys())]
 
-    hi_res, base, *imgs = [
+    hi_res, base, *imgs, last_img = [
         Image.open(f"{static_image_folder}/{x}") for x in ordered_images
     ]
     fp_out = f"{image_name}.gif"
 
     width = hi_res._size[0] + 10
-    height = hi_res._size[1]
+    height = hi_res._size[1] + 10
     new_imgs = []
     for i, img in enumerate(imgs):
-        new_im = Image.new("RGB", (width * 3, height))
+        new_im = Image.new("RGB", (width * 2, height * 2))
 
         new_im.paste(base, (0, 0))
-        new_im.paste(img, (width, 0))
-        new_im.paste(hi_res, (2 * width, 0))
+        new_im.paste(img, (0, height))
+        new_im.paste(hi_res, (width, 0))
+        new_im.paste(last_img, (width, height))
 
         draw = ImageDraw.Draw(new_im)
 
         draw.text((width / 2, 10), "bilinear interpolation")
-        draw.text((3 * width / 2, 10), f"epoch={i*100}")
-        draw.text((5 * width / 2, 10), "target")
+        draw.text((3 * width / 2, 10), f"target")
+
+        draw.text((width / 2, height), f"epoch={i*100}")
+        draw.text((3 * width / 2, height), "final epoch")
 
         new_imgs.append(new_im)
 
@@ -44,7 +47,7 @@ for image_name in image_names:
         format="GIF",
         append_images=new_imgs[1:],
         save_all=True,
-        duration=700,
+        duration=800,
         loop=0,
     )
 
