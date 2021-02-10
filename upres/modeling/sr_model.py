@@ -95,12 +95,38 @@ class SRModel:
         print(f"Loading model {self.name}_{epoch}.hdf5")
         self.model = keras.models.load_model(str(model_file_path))
 
+        # from upres.utils.image import Image
+        # import cv2
+
+        # image_path = "/Users/ryan/projects/starcraft_super_resolution/upres/data/input/frames/975.png"
+        # oo = Image(image_path, greyscale=False, scaling=3).get_array(1)
+        # x = Image(image_path, greyscale=False, scaling=3).get_array(1 / 3)
+        # x = np.expand_dims(x, axis=0)
+        # x = x[:, -95:, -153:, :]
+        # y = self.model.predict(x)
+
+        # xx = x[0, :, :, ::-1]
+        # yy = y[0, :, :, ::-1]
+        # # oo = oo[:, :, ::-1]
+        # z = cv2.resize(xx, (xx.shape[1] * 3, xx.shape[0] * 3))
+
+        # cv2.imwrite("low.png", xx)
+        # cv2.imwrite("low_big.png", z)
+        # cv2.imwrite("high.png", yy)
+        # cv2.imwrite("orig.png", oo)
+
+        # breakpoint()
+
     def make_model(self):
 
         self.calculate_receptive_field()
 
+        # inputs = keras.layers.Input(
+        #     shape=(self.input_shape[0], self.input_shape[1], self.channels),
+        #     name="input",
+        # )
         inputs = keras.layers.Input(
-            shape=(self.input_shape[0], self.input_shape[1], self.channels),
+            shape=(None, None, self.channels),
             name="input",
         )
 
