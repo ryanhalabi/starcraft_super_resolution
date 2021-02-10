@@ -29,7 +29,6 @@ for image_name in image_names:
         int(x.split("_")[-1][:-4]): x for x in images if x.split("_")[0] == image_name
     }
     ordered_images = [named_images[x] for x in sorted(named_images.keys())]
-    breakpoint()
     hi_res, base, *imgs, last_img = [
         Image.open(f"{static_image_folder}/{x}") for x in ordered_images
     ]

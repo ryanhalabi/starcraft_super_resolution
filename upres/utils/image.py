@@ -22,9 +22,7 @@ class Image:
 
     def get_array(self, scale=1):
         """
-        Loads image and returns as a resized array.
-
-        ex: get_array(scale=2) would return an array 2x the size of the original.
+        Loads image and adds padding as needed to accomodate the scaling without fractions.
         """
         array = cv2.imread(str(self.path), self.read_type)
 
