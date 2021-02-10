@@ -182,7 +182,7 @@ class SRModel:
             (conv_size, conv_size),
             strides=(1, 1),
             padding="same",
-            name=f"l_{len(self.layers)}",
+            name=f"l_{len(self.layers)-1}",
         )
 
         keras_layers.append(keras_layer)

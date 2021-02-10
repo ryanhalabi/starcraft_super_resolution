@@ -29,7 +29,7 @@ for image_name in image_names:
         int(x.split("_")[-1][:-4]): x for x in images if x.split("_")[0] == image_name
     }
     ordered_images = [named_images[x] for x in sorted(named_images.keys())]
-
+    breakpoint()
     hi_res, base, *imgs, last_img = [
         Image.open(f"{static_image_folder}/{x}") for x in ordered_images
     ]
@@ -50,8 +50,8 @@ for image_name in image_names:
 
         draw.text((width / 2, 10), "bilinear interpolation")
         draw.text((3 * width / 2, 10), "target")
-        draw.text((width / 2, height), f"epoch={i*100}")
-        draw.text((3 * width / 2, height), f"final epoch={ max(named_images.keys())}")
+        draw.text((width / 2, height+10), f"epoch={i*100}")
+        draw.text((3 * width / 2, height+10), f"final epoch={ max(named_images.keys())}")
 
         new_imgs.append(new_im)
 
@@ -60,7 +60,7 @@ for image_name in image_names:
         format="GIF",
         append_images=new_imgs[1:],
         save_all=True,
-        duration=800,
+        duration=400,
         loop=0,
     )
 
