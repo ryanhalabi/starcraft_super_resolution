@@ -31,7 +31,7 @@ class Environment(object):
         self.aws_key_name = os.getenv("key_name")
         self.aws_vpc_id = os.getenv("vpc_id")
 
-    def sync_with_s3(self, root_path):
+    def sync_with_s3(self):
         """
         Runs bash command to sync local files with s3 storage.
         """
@@ -41,7 +41,6 @@ class Environment(object):
             "sync",
             self.data_path,
             self.aws_s3_bucket_uri,
-            "--delete",
             "--only-show-errors"
         ]
 

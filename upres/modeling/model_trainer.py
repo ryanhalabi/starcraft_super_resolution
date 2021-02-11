@@ -132,7 +132,7 @@ class CustomCallback(tf.keras.callbacks.Callback):
             )
 
             if self.s3_sync:
-                env.sync_with_s3(env.data_path)
+                env.sync_with_s3()
 
 
 def log_images(images, model_name, images_path, epoch, start_epoch=0):

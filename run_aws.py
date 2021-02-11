@@ -23,7 +23,7 @@ ami_id = "ami-01a495658aa5f7930"
 
 name = "a_non_relu"
 dataset = "units"
-layers = "128,9 256,1 19"
+layers = "64,3 64,3 64,3 64,3 64,3 64,3 64,3 64,3 1"
 scaling = 3
 epochs = 20000000000
 batch_size = 32
@@ -36,26 +36,24 @@ gpu_user_data = f"""
 #!/bin/bash
 export PATH=$PATH:/home/ec2-user/anaconda3/bin
 source activate tensorflow2_p36
-
-git clone https://github.com/ryanhalabi/starcraft_super_resolution
-git -C ./starcraft_super_resolution/ pull
-
 python3 -m pip install --upgrade pip
-python3 -m pip install -r starcraft_super_resolution/requirements.txt
-python3 -m pip install -e starcraft_super_resolution/
-
-git clone https://github.com/google-research/receptive_field
-python3 -m pip install ./receptive_field/
 
 export AWS_ACCESS_KEY_ID={env.aws_access_key_id}
 export AWS_SECRET_ACCESS_KEY={env.aws_secret_access_key}
 export AWS_DEFAULT_REGION={env.aws_availability_zone}
 export s3_bucket_name={env.aws_s3_bucket_name}
 
+git clone https://github.com/ryanhalabi/starcraft_super_resolution
+python3 -m pip install -r starcraft_super_resolution/requirements.txt
+python3 -m pip install -e starcraft_super_resolution/
+
+git clone https://github.com/google-research/receptive_field
+python3 -m pip install ./receptive_field/
+
 aws s3 sync {env.aws_s3_bucket_uri} /starcraft_super_resolution/upres/data
 
 screen -S tensorboard -d -m bash -c "/home/ec2-user/anaconda3/envs/tensorflow2_p36/bin/tensorboard \
---logdir=/starcraft_super_resolution/upres/data/output --port=8080  --bind_all \
+--logdir=/starcraft_super_resolution/upres/data/output --port=8080 --bind_all \
 --max_reload_threads 1 --samples_per_plugin='images=200'"
 
 screen -S training -d -m bash -c '\
