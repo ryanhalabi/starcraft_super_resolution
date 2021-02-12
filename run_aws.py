@@ -23,7 +23,7 @@ ami_id = "ami-01a495658aa5f7930"
 
 name = "a_non_relu"
 dataset = "units"
-layers = "64,3 64,3 64,3 64,3 64,3 64,3 64,3 64,3 1"
+layers = "64,3 64,3 64,3 64,3 64,3 64,3 64,3 64,3 64,3 64,3 64,3 64,3 1"
 scaling = 3
 epochs = 20000000000
 batch_size = 32
@@ -31,6 +31,7 @@ epochs_per_save = 100
 greyscale = False
 overwrite = True
 s3_sync = True
+loss = "GAN"  # "MSE" or "GAN"
 
 gpu_user_data = f"""
 #!/bin/bash
@@ -61,7 +62,7 @@ export PATH=$PATH:/home/ec2-user/anaconda3/bin; \
 source activate tensorflow2_p36; \
 python3 /starcraft_super_resolution/run.py --name {name} --dataset {dataset} --layers {layers} \
 --scaling {scaling} --epochs {epochs} --batch_size {batch_size} --epochs_per_save {epochs_per_save} \
---greyscale {greyscale} --overwrite {overwrite} --s3_sync {s3_sync}\
+--greyscale {greyscale} --overwrite {overwrite} --s3_sync {s3_sync} --loss {loss}\
 '
 """
 

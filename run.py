@@ -40,6 +40,7 @@ def make_parser():
     parser.add_argument(
         "--layers", help="Middle layers architecture", default="1", nargs="*"
     )
+    parser.add_argument("--loss", help="MSE or GAN", default="MSE")
     parser.add_argument("--scaling", help="Scaling of image", default=3, type=int)
     parser.add_argument(
         "--epochs", help="How many epochs to train on", default=10, type=int
@@ -62,7 +63,8 @@ def make_parser():
     return parser
 
 
-# python3 run.py --name local_test --dataset units --layers 20,3 40,1 20 --scaling 3 --epochs 5 --overwrite True --s3_sync False
+# python3 /starcraft_super_resolution/run.py --name a_non_relu --dataset units --layers 128,9 256,1 19 --scaling 3 --epochs 20000000000 --batch_size 32 --epochs_per_save 100 --greyscale False --overwrite False
+# python3 run.py --name local_test --dataset units --layers 128,9 256,1 19 --scaling 3 --epochs 5 --overwrite True --s3_sync False --loss GAN
 # tensorboard --logdir=/Users/ryan/projects/starcraft_super_resolution/upres/data/output --port=8080  --bind_all --max_reload_threads 1 --samples_per_plugin='images=200'
 
 if __name__ == "__main__":
@@ -73,6 +75,7 @@ if __name__ == "__main__":
     dataset = arguments.dataset
     layers = arguments.layers
     name = arguments.name
+    loss = arguments.loss
     greyscale = False if arguments.greyscale == "False" else True
     scaling = arguments.scaling
     epochs = arguments.epochs
@@ -87,13 +90,14 @@ if __name__ == "__main__":
     images = download_images(dataset, greyscale, scaling)
 
     image_shape = tuple(images[0].get_array(1 / scaling).shape)
-    name = f"{name}_{dataset}_{layers}"
+    name = f"{name}_{dataset}_{layers}_{loss}"
 
     # build or load sr model
     sr_model = SRModel(
         name,
         image_shape,
         layers,
+        loss,
         channels=channels,
         scaling=scaling,
         overwrite=overwrite,

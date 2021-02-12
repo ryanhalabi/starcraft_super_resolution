@@ -21,6 +21,7 @@ class SRModel:
         name,
         input_shape,
         layers,
+        loss,
         scaling=5,
         channels=1,
         overwrite=False,
@@ -34,6 +35,8 @@ class SRModel:
             Shape of inputs, used when building input layer.
         layers : [keras.Layer]
             List of Keras layers used in middle of network.
+        loss: str MSE or GAN
+            Determines the loss metric to optimize against.
         scaling : odd int
             Downscaling to apply to images before attempting to recreation.
         channels : int, 3 or 1
@@ -52,6 +55,7 @@ class SRModel:
         self.conv_size = 2 * self.scaling - 1
         self.input_shape = input_shape
         self.layers = layers
+        self.loss = loss
 
         self.set_optimizer()
 
@@ -151,9 +155,44 @@ class SRModel:
         cropping_layer = self.make_cropping_layer()
         predictions = cropping_layer(add_layer)
 
-        # finalize model
         model = keras.Model(inputs=inputs, outputs=predictions)
-        model.compile(self.optimizer, "mean_squared_error")
+
+        # finalize model
+        if self.loss == "MSE":
+            model.compile(self.optimizer, "mean_squared_error")
+
+        if self.loss == "GAN":
+            d_input = keras.Input(shape=(None, None, self.channels))
+
+            l0 = keras.layers.Conv2D(
+                64, kernel_size=3, strides=2, padding="same", activation="relu"
+            )(d_input)
+
+            l1 = keras.layers.Conv2D(
+                64, kernel_size=3, strides=2, padding="same", activation="relu"
+            )(l0)
+
+            l2 = keras.layers.Conv2D(
+                64, kernel_size=3, strides=2, padding="same", activation="relu"
+            )(l1)
+            l3 = keras.layers.Conv2D(
+                1,
+                kernel_size=3,
+                strides=2,
+                padding="same",
+                activation="sigmoid",
+            )(l2)
+            l4 = keras.layers.GlobalMaxPool2D()(l3)
+
+            discriminator = keras.Model(inputs=d_input, outputs=l4)
+
+            model = SuperResolutionGAN(discriminator, model)
+
+            model.compile(
+                d_optimizer=keras.optimizers.Adam(learning_rate=0.0001),
+                g_optimizer=keras.optimizers.Adam(learning_rate=0.0001),
+                loss_fn=keras.losses.BinaryCrossentropy(),
+            )
 
         print(f"Created new model: {self.name}")
 
@@ -239,3 +278,73 @@ class SRModel:
         self.rf_stride = int(receptive_field.stride[0])
         self.rf_size = int(receptive_field.size[0])
         self.rf_padding = int(receptive_field.padding[0])
+
+
+class SuperResolutionGAN(keras.Model):
+    def __init__(self, discriminator, generator):
+        super(SuperResolutionGAN, self).__init__()
+        self.discriminator = discriminator
+        self.generator = generator
+
+    def compile(self, d_optimizer, g_optimizer, loss_fn):
+        super(SuperResolutionGAN, self).compile()
+        self.d_optimizer = d_optimizer
+        self.g_optimizer = g_optimizer
+        self.loss_fn = loss_fn
+        self.d_loss_metric = keras.metrics.Mean(name="d_loss")
+        self.g_loss_metric = keras.metrics.Mean(name="g_loss")
+
+    def predict(self, X):
+        return self.generator.predict(X)
+
+    def save(self, file_name):
+        self.discriminator.save(file_name.replace(".hdf5", "_discriminator.hdf5"))
+        self.generator.save(file_name.replace(".hdf5", "_generator.hdf5"))
+
+    @property
+    def metrics(self):
+        return [self.d_loss_metric, self.g_loss_metric]
+
+    def train_step(self, data):
+
+        x, y = data
+        y = tf.cast(y, "float32")
+        pred = self.generator(x)
+        combined_images = tf.concat([pred, y], axis=0)
+        batch_size = tf.shape(x)[0]
+
+        labels = tf.concat(
+            [tf.ones((batch_size, 1)), tf.zeros((batch_size, 1))], axis=0
+        )
+        # Add random noise to the labels - important trick!
+        labels += 0.05 * tf.random.uniform(tf.shape(labels))
+
+        # Train the discriminator
+        with tf.GradientTape() as tape:
+            predictions = self.discriminator(combined_images)
+            d_loss = self.loss_fn(labels, predictions)
+        grads = tape.gradient(d_loss, self.discriminator.trainable_weights)
+        self.d_optimizer.apply_gradients(
+            zip(grads, self.discriminator.trainable_weights)
+        )
+
+
+
+        # Assemble labels that say "all real images"
+        misleading_labels = tf.zeros((batch_size, 1))
+
+        # Train the generator (note that we should *not* update the weights
+        # of the discriminator)!
+        with tf.GradientTape() as tape:
+            predictions = self.discriminator(self.generator(x))
+            g_loss = self.loss_fn(misleading_labels, predictions)
+        grads = tape.gradient(g_loss, self.generator.trainable_weights)
+        self.g_optimizer.apply_gradients(zip(grads, self.generator.trainable_weights))
+
+        # Update metrics
+        self.d_loss_metric.update_state(d_loss)
+        self.g_loss_metric.update_state(g_loss)
+        return {
+            "d_loss": self.d_loss_metric.result(),
+            "g_loss": self.g_loss_metric.result(),
+        }
