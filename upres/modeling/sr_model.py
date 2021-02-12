@@ -160,18 +160,16 @@ class SRModel:
         # finalize model
         if self.loss == "MSE":
             model.compile(self.optimizer, "mean_squared_error")
+            return model
 
         if self.loss == "GAN":
             d_input = keras.Input(shape=(None, None, self.channels))
-
             l0 = keras.layers.Conv2D(
                 64, kernel_size=3, strides=2, padding="same", activation="relu"
             )(d_input)
-
             l1 = keras.layers.Conv2D(
                 64, kernel_size=3, strides=2, padding="same", activation="relu"
             )(l0)
-
             l2 = keras.layers.Conv2D(
                 64, kernel_size=3, strides=2, padding="same", activation="relu"
             )(l1)
@@ -186,17 +184,16 @@ class SRModel:
 
             discriminator = keras.Model(inputs=d_input, outputs=l4)
 
-            model = SuperResolutionGAN(discriminator, model)
+            gan_model = SuperResolutionGAN(discriminator, model)
 
-            model.compile(
+            gan_model.compile(
                 d_optimizer=keras.optimizers.Adam(learning_rate=0.0001),
                 g_optimizer=keras.optimizers.Adam(learning_rate=0.0001),
                 loss_fn=keras.losses.BinaryCrossentropy(),
             )
 
+            return gan_model
         print(f"Created new model: {self.name}")
-
-        return model
 
     def apply_layers(self, keras_layers, input):
 
@@ -288,6 +285,9 @@ class SuperResolutionGAN(keras.Model):
 
     def compile(self, d_optimizer, g_optimizer, loss_fn):
         super(SuperResolutionGAN, self).compile()
+        self.discriminator.compile(d_optimizer)
+        self.generator.compile(g_optimizer)
+
         self.d_optimizer = d_optimizer
         self.g_optimizer = g_optimizer
         self.loss_fn = loss_fn
@@ -327,8 +327,6 @@ class SuperResolutionGAN(keras.Model):
         self.d_optimizer.apply_gradients(
             zip(grads, self.discriminator.trainable_weights)
         )
-
-
 
         # Assemble labels that say "all real images"
         misleading_labels = tf.zeros((batch_size, 1))
